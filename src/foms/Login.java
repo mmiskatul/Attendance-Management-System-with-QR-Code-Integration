@@ -6,7 +6,8 @@ package foms;
 
 import java.awt.Color;
 import javax.swing.BorderFactory;
-import utility.BDUtility;
+import javax.swing.JOptionPane;
+import utility.DBUtility;
 
 /**
  *
@@ -19,7 +20,7 @@ public class Login extends javax.swing.JFrame {
      */
     public Login() {
         initComponents();
-        BDUtility.SetImage(this, "images/login-background.jpg", 635, 506);
+        DBUtility.SetImage(this, "images/login-background.jpg", 635, 506);
         this.getRootPane().setBorder(BorderFactory.createMatteBorder(6, 6, 6, 6, Color.ORANGE));
         textEmail.setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.yellow));
         textPassword.setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.yellow));
@@ -158,7 +159,14 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_btnExitActionPerformed
 
     private void btnloginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnloginActionPerformed
-        // TODO add your handling code here:
+        String email =textEmail.getText();
+        String password=new String(textPassword.getPassword());
+        if("Miskatul".equalsIgnoreCase(email)&& "Miskatul".equalsIgnoreCase(password)){
+            this.dispose();
+            DBUtility.openForm(DashBoard.class.getSimpleName(),new DashBoard());   
+        }else{
+            JOptionPane.showMessageDialog(null, "Invalid Credentials!","Invalid",JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnloginActionPerformed
 
     private void textEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textEmailActionPerformed

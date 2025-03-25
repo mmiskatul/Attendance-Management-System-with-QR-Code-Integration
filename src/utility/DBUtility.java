@@ -18,11 +18,11 @@ import javax.swing.JLabel;
  *
  * @author user
  */
-public class BDUtility {
+public class DBUtility {
 
     public static void SetImage(JFrame frame, String imagePath, int newWidth, int newHeight) {
         try {
-            BufferedImage originalImage = ImageIO.read(BDUtility.class.getResourceAsStream(imagePath));
+            BufferedImage originalImage = ImageIO.read(DBUtility.class.getResourceAsStream(imagePath));
             BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
             resizedImage.createGraphics().drawImage(resizedImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH), 0, 0, null);
             ImageIcon backgroundImage = new ImageIcon(resizedImage);
