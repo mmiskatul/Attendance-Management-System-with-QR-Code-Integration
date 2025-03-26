@@ -40,6 +40,7 @@ public class ConnectionProvider {
         Statement stmt = con.createStatement();
         stmt.executeUpdate("CREATE DATABASE " + dbName);
         System.out.println("DATABASE '" + dbName + "' Created Successfully!"); 
-        stmt.close();//miskat
+        stmt.close();//miskatul Masabi
+        
     }
 }
