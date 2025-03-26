@@ -1,13 +1,20 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 
-/**
- *
- * @author user
- */
+import java.sql.Connection;
+import javax.swing.JOptionPane;
+
 public class Tables {
-    
+    public static void main(String[] args) {
+        try {
+            Connection con = ConnectionProvider.getcon(); 
+            if (con != null) {
+                System.out.println("Connected to database successfully!"); 
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+        finally{
+            
+        }
+    }
 }
