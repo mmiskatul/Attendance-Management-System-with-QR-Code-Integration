@@ -30,7 +30,6 @@ public class DashBoard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        btnExit = new javax.swing.JButton();
         btnRegisterUser = new javax.swing.JButton();
         btnviewuser = new javax.swing.JButton();
         btnupdateuser = new javax.swing.JButton();
@@ -39,19 +38,12 @@ public class DashBoard extends javax.swing.JFrame {
         btnmarkattendance = new javax.swing.JButton();
         btndeleteuser = new javax.swing.JButton();
         btnviewattendance = new javax.swing.JButton();
+        btnExit1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(1024, 600));
         setMinimumSize(new java.awt.Dimension(1024, 600));
         setUndecorated(true);
-
-        btnExit.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        btnExit.setText("X");
-        btnExit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnExitActionPerformed(evt);
-            }
-        });
 
         btnRegisterUser.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         btnRegisterUser.setText("Register User");
@@ -117,6 +109,14 @@ public class DashBoard extends javax.swing.JFrame {
             }
         });
 
+        btnExit1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnExit1.setText("X");
+        btnExit1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExit1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -138,38 +138,35 @@ public class DashBoard extends javax.swing.JFrame {
                 .addComponent(btnmarkattendance)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnviewattendance)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnExit)
-                .addGap(19, 19, 19))
+                .addGap(19, 19, 19)
+                .addComponent(btnExit1)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(14, 14, 14)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnRegisterUser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnviewuser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnupdateuser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btndeleteuser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btngenerateqr, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnviewqrs, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnmarkattendance, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnviewattendance, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(btnExit))
-                .addContainerGap(426, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnRegisterUser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnviewuser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnupdateuser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btndeleteuser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btngenerateqr, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnviewqrs, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnmarkattendance, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnviewattendance, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(365, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(btnExit1)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
-        System.exit(0);
-    }//GEN-LAST:event_btnExitActionPerformed
-
     private void btnRegisterUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterUserActionPerformed
-        // TODO add your handling code here:
+       DBUtility.openForm(UserRegistration.class.getSimpleName(), new UserRegistration());
     }//GEN-LAST:event_btnRegisterUserActionPerformed
 
     private void btnviewuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnviewuserActionPerformed
@@ -199,6 +196,10 @@ public class DashBoard extends javax.swing.JFrame {
     private void btnviewattendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnviewattendanceActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnviewattendanceActionPerformed
+
+    private void btnExit1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExit1ActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btnExit1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -236,7 +237,7 @@ public class DashBoard extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnExit;
+    private javax.swing.JButton btnExit1;
     private javax.swing.JButton btnRegisterUser;
     private javax.swing.JButton btndeleteuser;
     private javax.swing.JButton btngenerateqr;
