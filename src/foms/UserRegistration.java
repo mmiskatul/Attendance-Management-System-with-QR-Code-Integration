@@ -1,4 +1,3 @@
-
 package foms;
 
 import java.awt.Color;
@@ -9,6 +8,7 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import utility.DBUtility;
 
 /**
@@ -22,8 +22,8 @@ public class UserRegistration extends javax.swing.JFrame {
      */
     public UserRegistration() {
         initComponents();
-        DBUtility.SetImage(this,"/utility/images/A.jpg", 760, 500);
-        this.getRootPane().setBorder(BorderFactory.createMatteBorder(4,4,4,4,Color.YELLOW));
+        DBUtility.SetImage(this, "/utility/images/A.jpg", 760, 500);
+        this.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.YELLOW));
     }
 
     /**
@@ -313,7 +313,7 @@ public class UserRegistration extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
-       this.dispose();
+        this.dispose();
     }//GEN-LAST:event_btnExitActionPerformed
 
     private void textnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textnameActionPerformed
@@ -351,77 +351,93 @@ public class UserRegistration extends javax.swing.JFrame {
     private void btnclearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnclearActionPerformed
         clearForm();
     }//GEN-LAST:event_btnclearActionPerformed
-    BufferedImage originalImage=null;
-    File selectedfile=null;
-    
+    BufferedImage originalImage = null;
+    File selectedfile = null;
+
     private void lblimageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblimageMouseClicked
-        JFileChooser filechoser= new JFileChooser();
-        int result =filechoser.showOpenDialog(this);
-        if(result == JFileChooser.APPROVE_OPTION){
-            selectedfile =filechoser.getSelectedFile();
-            try{
-                originalImage=ImageIO.read(selectedfile);
-                
-                int originalWidth=originalImage.getWidth();
-                int originalHeight=originalImage.getHeight();
-                
-                int labelwidth=lblimage.getWidth();
-                int labelHeight=lblimage.getHeight();
-                
-                double scaleX =(double)labelwidth/originalWidth;
-                double scaleY =(double)labelHeight/originalHeight;
-                double scale=Math.min(scaleX, scaleY);
-                
-                int scaledWidth = (int)(originalWidth *scale);
-                int scaledHeight =(int)(originalHeight*scale);
-                Image scaledImage=originalImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
-                
-                ImageIcon icon= new ImageIcon(scaledImage);
+        JFileChooser filechoser = new JFileChooser();
+        int result = filechoser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            selectedfile = filechoser.getSelectedFile();
+            try {
+                originalImage = ImageIO.read(selectedfile);
+
+                int originalWidth = originalImage.getWidth();
+                int originalHeight = originalImage.getHeight();
+
+                int labelwidth = lblimage.getWidth();
+                int labelHeight = lblimage.getHeight();
+
+                double scaleX = (double) labelwidth / originalWidth;
+                double scaleY = (double) labelHeight / originalHeight;
+                double scale = Math.min(scaleX, scaleY);
+
+                int scaledWidth = (int) (originalWidth * scale);
+                int scaledHeight = (int) (originalHeight * scale);
+                Image scaledImage = originalImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+
+                ImageIcon icon = new ImageIcon(scaledImage);
                 lblimage.setIcon(icon);
-                
-                
-                
-            }catch(Exception ex){
+
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
     }//GEN-LAST:event_lblimageMouseClicked
 
     private void radioMaleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_radioMaleItemStateChanged
-        if(radioMale.isSelected()){
+        if (radioMale.isSelected()) {
             radiofemale.setSelected(false);
         }
     }//GEN-LAST:event_radioMaleItemStateChanged
 
     private void radiofemaleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_radiofemaleItemStateChanged
-        if(radiofemale.isSelected()){
+        if (radiofemale.isSelected()) {
             radioMale.setSelected(false);
         }
     }//GEN-LAST:event_radiofemaleItemStateChanged
 
     private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
-        
+        try {
+            String name = textname.getText().toString();
+            String gender = "";
+            if (radioMale.isSelected()) {
+                gender = "Male";
+            } else if (radiofemale.isSelected()) {
+                gender = "Female";
+            }
+            String email = textname.getText().toString();
+            String emailRegX="^[A-Za-z0-9+__.-]+@[A-Za-z0-9.-]+$";
+            if(!email.matches(emailRegX)){
+                JOptionPane.showMessageDialog(null, "Invalid Email","Invalid",JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }//GEN-LAST:event_btnRegisterActionPerformed
 
-    private String saveImage(String email){
-        if(originalImage !=null && selectedfile != null){
-            try{
-                String savePath=DBUtility.getPath("images\\");
-                String extension=DBUtility.getFileExtension(selectedfile.getName());
-                String imageName =email+"."+extension;
-                File savefile=new File(savePath+imageName);
-                BufferedImage scaledImage=DBUtility.scaleImage(originalImage, ImageIO.read(selectedfile));
+    private String saveImage(String email) {
+        if (originalImage != null && selectedfile != null) {
+            try {
+                String savePath = DBUtility.getPath("images\\");
+                String extension = DBUtility.getFileExtension(selectedfile.getName());
+                String imageName = email + "." + extension;
+                File savefile = new File(savePath + imageName);
+                BufferedImage scaledImage = DBUtility.scaleImage(originalImage, ImageIO.read(selectedfile));
                 ImageIO.write(scaledImage, extension, savefile);
                 return imageName;
-                
-            }catch(Exception ex){
-                
+
+            } catch (Exception ex) {
+
             }
         }
         return null;
     }
-    
-    private void clearForm(){
+
+    private void clearForm() {
         textname.setText("");
         textemail.setText("");
         textcontract.setText("");
@@ -431,8 +447,9 @@ public class UserRegistration extends javax.swing.JFrame {
         radioMale.setSelected(false);
         radiofemale.setSelected(false);
         lblimage.setIcon(null);
-        
+
     }
+
     /**
      * @param args the command line arguments
      */
