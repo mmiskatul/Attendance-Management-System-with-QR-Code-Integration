@@ -55,7 +55,7 @@ public class UserRegistration extends javax.swing.JFrame {
         textcountry = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         btnRegister = new javax.swing.JButton();
-        btnRegister1 = new javax.swing.JButton();
+        btnclear = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(760, 400));
@@ -192,12 +192,17 @@ public class UserRegistration extends javax.swing.JFrame {
 
         btnRegister.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         btnRegister.setText("Register");
-
-        btnRegister1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        btnRegister1.setText("Clear");
-        btnRegister1.addActionListener(new java.awt.event.ActionListener() {
+        btnRegister.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnRegister1ActionPerformed(evt);
+                btnRegisterActionPerformed(evt);
+            }
+        });
+
+        btnclear.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btnclear.setText("Clear");
+        btnclear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnclearActionPerformed(evt);
             }
         });
 
@@ -251,7 +256,7 @@ public class UserRegistration extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnRegister, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGap(28, 28, 28)
-                                .addComponent(btnRegister1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(btnclear, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jInternalFrame1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(30, 30, 30)))
                 .addGap(39, 39, 39))
@@ -270,7 +275,7 @@ public class UserRegistration extends javax.swing.JFrame {
                         .addGap(56, 56, 56)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnRegister, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnRegister1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(btnclear, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
@@ -343,9 +348,9 @@ public class UserRegistration extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_textcountryActionPerformed
 
-    private void btnRegister1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegister1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnRegister1ActionPerformed
+    private void btnclearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnclearActionPerformed
+        clearForm();
+    }//GEN-LAST:event_btnclearActionPerformed
     BufferedImage originalImage=null;
     File selectedfile=null;
     
@@ -394,6 +399,40 @@ public class UserRegistration extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_radiofemaleItemStateChanged
 
+    private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
+        
+    }//GEN-LAST:event_btnRegisterActionPerformed
+
+    private String saveImage(String email){
+        if(originalImage !=null && selectedfile != null){
+            try{
+                String savePath=DBUtility.getPath("images\\");
+                String extension=DBUtility.getFileExtension(selectedfile.getName());
+                String imageName =email+"."+extension;
+                File savefile=new File(savePath+imageName);
+                BufferedImage scaledImage=DBUtility.scaleImage(originalImage, ImageIO.read(selectedfile));
+                ImageIO.write(scaledImage, extension, savefile);
+                return imageName;
+                
+            }catch(Exception ex){
+                
+            }
+        }
+        return null;
+    }
+    
+    private void clearForm(){
+        textname.setText("");
+        textemail.setText("");
+        textcontract.setText("");
+        textaddress.setText("");
+        textdivision.setText("");
+        textcountry.setText("");
+        radioMale.setSelected(false);
+        radiofemale.setSelected(false);
+        lblimage.setIcon(null);
+        
+    }
     /**
      * @param args the command line arguments
      */
@@ -432,7 +471,7 @@ public class UserRegistration extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnRegister;
-    private javax.swing.JButton btnRegister1;
+    private javax.swing.JButton btnclear;
     private javax.swing.JInternalFrame jInternalFrame1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
