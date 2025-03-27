@@ -12,6 +12,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import utility.DBUtility;
 import java.sql.Connection;
+import java.sql.*;
 
 /**
  *
@@ -459,9 +460,21 @@ public class UserRegistration extends javax.swing.JFrame {
                 return;
             }
             String uniqueRegistrationId = "" + System.nanoTime() + System.nanoTime() + System.nanoTime();
-            Connection connection=ConnectionProvider.getcon();
-            
-            String imageName =saveImage(email);
+            Connection connection = ConnectionProvider.getcon();
+            try {
+                Statement st = connection.createStatement();
+                ResultSet rs = st.executeQuery("SELECT * FROM userdetails WHERE email='" + email + "'");
+                if (rs.next()) {
+                    JOptionPane.showMessageDialog(null, "Duplicate Email.", "Duplicate", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, ex);
+            }
+
+            String imageName = saveImage(email);
+           
         } catch (Exception ex) {
             ex.printStackTrace();
         }
