@@ -406,10 +406,27 @@ public class UserRegistration extends javax.swing.JFrame {
             } else if (radiofemale.isSelected()) {
                 gender = "Female";
             }
-            String email = textname.getText().toString();
-            String emailRegX="^[A-Za-z0-9+__.-]+@[A-Za-z0-9.-]+$";
-            if(!email.matches(emailRegX)){
-                JOptionPane.showMessageDialog(null, "Invalid Email","Invalid",JOptionPane.ERROR_MESSAGE);
+            String email = textemail.getText().toString();  
+            String emailRegX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+
+            if (email.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Email cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+                textemail.requestFocus();  
+                return;
+            } else if (!email.matches(emailRegX)) {
+                JOptionPane.showMessageDialog(null,
+                        "Please enter a valid email (e.g., user@example.com)", 
+                        "Invalid Email",
+                        JOptionPane.ERROR_MESSAGE);
+                textemail.requestFocus();  
+                textemail.selectAll();     
+                return;
+            }
+            String contract = textcontract.getText().toString();
+            String contractRegX = "^\\d{5}$";
+            if (!contract.matches(contractRegX)) {
+                JOptionPane.showMessageDialog(null, "Invalid Contract Number", "Invalid", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
