@@ -1,8 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
+
 package foms;
+
+import java.awt.Color;
+import javax.swing.BorderFactory;
+import utility.DBUtility;
 
 /**
  *
@@ -15,6 +16,9 @@ public class DashBoard extends javax.swing.JFrame {
      */
     public DashBoard() {
         initComponents();
+        DBUtility.SetImage(this,"/utility/images/A.jpg", 1024, 600);
+        this.getRootPane().setBorder(BorderFactory.createMatteBorder(4,4,4,4,Color.BLACK));
+        
     }
 
     /**
@@ -26,21 +30,176 @@ public class DashBoard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        btnRegisterUser = new javax.swing.JButton();
+        btnviewuser = new javax.swing.JButton();
+        btnupdateuser = new javax.swing.JButton();
+        btngenerateqr = new javax.swing.JButton();
+        btnviewqrs = new javax.swing.JButton();
+        btnmarkattendance = new javax.swing.JButton();
+        btndeleteuser = new javax.swing.JButton();
+        btnviewattendance = new javax.swing.JButton();
+        btnExit1 = new javax.swing.JButton();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setMaximumSize(new java.awt.Dimension(1024, 600));
+        setMinimumSize(new java.awt.Dimension(1024, 600));
+        setUndecorated(true);
+
+        btnRegisterUser.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnRegisterUser.setText("Register User");
+        btnRegisterUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRegisterUserActionPerformed(evt);
+            }
+        });
+
+        btnviewuser.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnviewuser.setText("View User");
+        btnviewuser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnviewuserActionPerformed(evt);
+            }
+        });
+
+        btnupdateuser.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnupdateuser.setText("Update User");
+        btnupdateuser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnupdateuserActionPerformed(evt);
+            }
+        });
+
+        btngenerateqr.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btngenerateqr.setText("Generate QR");
+        btngenerateqr.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btngenerateqrActionPerformed(evt);
+            }
+        });
+
+        btnviewqrs.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnviewqrs.setText("View QRS");
+        btnviewqrs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnviewqrsActionPerformed(evt);
+            }
+        });
+
+        btnmarkattendance.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnmarkattendance.setText("Mark Attendance");
+        btnmarkattendance.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnmarkattendanceActionPerformed(evt);
+            }
+        });
+
+        btndeleteuser.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btndeleteuser.setText("Delete User");
+        btndeleteuser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btndeleteuserActionPerformed(evt);
+            }
+        });
+
+        btnviewattendance.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnviewattendance.setText("View Attendance");
+        btnviewattendance.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnviewattendanceActionPerformed(evt);
+            }
+        });
+
+        btnExit1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnExit1.setText("X");
+        btnExit1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExit1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnRegisterUser, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                .addComponent(btnviewuser)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnupdateuser)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btndeleteuser)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btngenerateqr)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnviewqrs)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnmarkattendance)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnviewattendance)
+                .addGap(19, 19, 19)
+                .addComponent(btnExit1)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnRegisterUser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnviewuser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnupdateuser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btndeleteuser, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btngenerateqr, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnviewqrs, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnmarkattendance, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnviewattendance, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(365, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(btnExit1)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnRegisterUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterUserActionPerformed
+       DBUtility.openForm(UserRegistration.class.getSimpleName(), new UserRegistration());
+    }//GEN-LAST:event_btnRegisterUserActionPerformed
+
+    private void btnviewuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnviewuserActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnviewuserActionPerformed
+
+    private void btnupdateuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnupdateuserActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnupdateuserActionPerformed
+
+    private void btngenerateqrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btngenerateqrActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btngenerateqrActionPerformed
+
+    private void btnviewqrsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnviewqrsActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnviewqrsActionPerformed
+
+    private void btnmarkattendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnmarkattendanceActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnmarkattendanceActionPerformed
+
+    private void btndeleteuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btndeleteuserActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btndeleteuserActionPerformed
+
+    private void btnviewattendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnviewattendanceActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnviewattendanceActionPerformed
+
+    private void btnExit1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExit1ActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btnExit1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -78,5 +237,14 @@ public class DashBoard extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExit1;
+    private javax.swing.JButton btnRegisterUser;
+    private javax.swing.JButton btndeleteuser;
+    private javax.swing.JButton btngenerateqr;
+    private javax.swing.JButton btnmarkattendance;
+    private javax.swing.JButton btnupdateuser;
+    private javax.swing.JButton btnviewattendance;
+    private javax.swing.JButton btnviewqrs;
+    private javax.swing.JButton btnviewuser;
     // End of variables declaration//GEN-END:variables
 }
