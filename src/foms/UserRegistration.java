@@ -90,6 +90,11 @@ public class UserRegistration extends javax.swing.JFrame {
         radioMale.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         radioMale.setForeground(new java.awt.Color(255, 255, 255));
         radioMale.setText("Male");
+        radioMale.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                radioMaleItemStateChanged(evt);
+            }
+        });
         radioMale.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radioMaleActionPerformed(evt);
@@ -99,6 +104,11 @@ public class UserRegistration extends javax.swing.JFrame {
         radiofemale.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         radiofemale.setForeground(new java.awt.Color(255, 255, 255));
         radiofemale.setText("Female");
+        radiofemale.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                radiofemaleItemStateChanged(evt);
+            }
+        });
         radiofemale.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radiofemaleActionPerformed(evt);
@@ -371,6 +381,18 @@ public class UserRegistration extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_lblimageMouseClicked
+
+    private void radioMaleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_radioMaleItemStateChanged
+        if(radioMale.isSelected()){
+            radiofemale.setSelected(false);
+        }
+    }//GEN-LAST:event_radioMaleItemStateChanged
+
+    private void radiofemaleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_radiofemaleItemStateChanged
+        if(radiofemale.isSelected()){
+            radioMale.setSelected(false);
+        }
+    }//GEN-LAST:event_radiofemaleItemStateChanged
 
     /**
      * @param args the command line arguments
