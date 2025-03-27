@@ -462,31 +462,46 @@ public class UserRegistration extends javax.swing.JFrame {
             String uniqueRegistrationId = "" + System.nanoTime() + System.nanoTime() + System.nanoTime();
             Connection connection = ConnectionProvider.getcon();
             try {
-                Statement st = connection.createStatement();
-                ResultSet rs = st.executeQuery("SELECT * FROM userdetails WHERE email='" + email + "'");
+                String query = "SELECT email FROM userdetails WHERE email = ?";
+                PreparedStatement pst = connection.prepareStatement(query);
+                pst.setString(1, email.trim());  
+
+                ResultSet rs = pst.executeQuery();
+
                 if (rs.next()) {
-                    JOptionPane.showMessageDialog(null, "Duplicate Email.", "Duplicate", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(null,
+                            "Email already registered",
+                            "Duplicate",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(null, ex);
+            } finally {
+                try {
+                    if (connection != null) {
+                        connection.close();
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
 
             String imageName = saveImage(email);
-            String insertQuery = "INSERT INTO userdetails(name,gender,email,contract,address,division,country,uniqueRegistrationId,imageName) VALUE(?,?,?,?,?,?,?,?,?)";
-            PreparedStatement preparedstatement=connection.prepareStatement(insertQuery);
-            preparedstatement.setString(1,name);
-            preparedstatement.setString(2,gender);
-            preparedstatement.setString(3,email);
-            preparedstatement.setString(4,contract);
-            preparedstatement.setString(5,address);
-            preparedstatement.setString(6,division);
-            preparedstatement.setString(7,country);
-            preparedstatement.setString(8,uniqueRegistrationId);
-            preparedstatement.setString(9,imageName);
-            preparedstatement.executeQuery();
-            JOptionPane.showMessageDialog(null, "User Registrated Successfully");
+            String insertQuery = "INSERT INTO userdetails(name,gender,email,contract,address,division,country,unique_registration_id,imageName) VALUES(?,?,?,?,?,?,?,?,?)";
+            PreparedStatement preparedstatement = connection.prepareStatement(insertQuery);
+            preparedstatement.setString(1, name);
+            preparedstatement.setString(2, gender);
+            preparedstatement.setString(3, email);
+            preparedstatement.setString(4, contract);
+            preparedstatement.setString(5, address);
+            preparedstatement.setString(6, division);
+            preparedstatement.setString(7, country);
+            preparedstatement.setString(8, uniqueRegistrationId);
+            preparedstatement.setString(9, imageName);
+            preparedstatement.executeUpdate();
+            JOptionPane.showMessageDialog(null, "User Registered Successfully");
             clearForm();
         } catch (Exception ex) {
             ex.printStackTrace();
