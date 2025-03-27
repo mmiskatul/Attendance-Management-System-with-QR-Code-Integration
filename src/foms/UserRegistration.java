@@ -474,7 +474,20 @@ public class UserRegistration extends javax.swing.JFrame {
             }
 
             String imageName = saveImage(email);
-           
+            String insertQuery = "INSERT INTO userdetails(name,gender,email,contract,address,division,country,uniqueRegistrationId,imageName) VALUE(?,?,?,?,?,?,?,?,?)";
+            PreparedStatement preparedstatement=connection.prepareStatement(insertQuery);
+            preparedstatement.setString(1,name);
+            preparedstatement.setString(2,gender);
+            preparedstatement.setString(3,email);
+            preparedstatement.setString(4,contract);
+            preparedstatement.setString(5,address);
+            preparedstatement.setString(6,division);
+            preparedstatement.setString(7,country);
+            preparedstatement.setString(8,uniqueRegistrationId);
+            preparedstatement.setString(9,imageName);
+            preparedstatement.executeQuery();
+            JOptionPane.showMessageDialog(null, "User Registrated Successfully");
+            clearForm();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
