@@ -1,5 +1,6 @@
 package foms;
 
+import dao.ConnectionProvider;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -10,6 +11,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import utility.DBUtility;
+import java.sql.Connection;
 
 /**
  *
@@ -400,37 +402,66 @@ public class UserRegistration extends javax.swing.JFrame {
     private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
         try {
             String name = textname.getText().toString();
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Name cannot be empty", "Error", JOptionPane.WARNING_MESSAGE);
+                textname.requestFocus();
+                return;
+            }
             String gender = "";
             if (radioMale.isSelected()) {
                 gender = "Male";
             } else if (radiofemale.isSelected()) {
                 gender = "Female";
             }
-            String email = textemail.getText().toString();  
+            if (gender.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Invalid", "Empty Gender", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String email = textemail.getText().toString();
             String emailRegX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,}$";
 
-
             if (email.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Email cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
-                textemail.requestFocus();  
+                JOptionPane.showMessageDialog(null, "Email cannot be empty", "Error", JOptionPane.WARNING_MESSAGE);
+                textemail.requestFocus();
                 return;
             } else if (!email.matches(emailRegX)) {
                 JOptionPane.showMessageDialog(null,
-                        "Please enter a valid email (e.g., user@example.com)", 
+                        "Please enter a valid email (e.g., user@example.com)",
                         "Invalid Email",
                         JOptionPane.ERROR_MESSAGE);
-                textemail.requestFocus();  
-                textemail.selectAll();     
+                textemail.requestFocus();
+                textemail.selectAll();
                 return;
             }
             String contract = textcontract.getText().toString();
-            String contractRegX = "^\\d{5}$";
+            String contractRegX = "^\\d{11}$";
             if (!contract.matches(contractRegX)) {
                 JOptionPane.showMessageDialog(null, "Invalid Contract Number", "Invalid", JOptionPane.ERROR_MESSAGE);
+                textcontract.requestFocus();
                 return;
             }
+            String address = textaddress.getText().toString();
+            if (address.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Frist file the address field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+                textaddress.requestFocus();
+                return;
+            }
+            String division = textdivision.getText().toString();
+            if (division.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Frist file the division field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+                textdivision.requestFocus();
+                return;
+            }
+            String country = textcountry.getText().toString();
+            if (division.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Frist file the country field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+                textcountry.requestFocus();
+                return;
+            }
+            String uniqueRegistrationId = "" + System.nanoTime() + System.nanoTime() + System.nanoTime();
+            Connection connection=ConnectionProvider.getcon();
             
-
+            String imageName =saveImage(email);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
