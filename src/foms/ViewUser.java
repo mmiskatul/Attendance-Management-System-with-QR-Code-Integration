@@ -6,6 +6,7 @@ import javax.swing.table.DefaultTableModel;
 import utility.DBUtility;
 import java.sql.*;
 import dao.ConnectionProvider;
+import java.util.Objects;
 import javax.swing.JOptionPane;
 
 /**
@@ -19,9 +20,9 @@ public class ViewUser extends javax.swing.JFrame {
      */
     public ViewUser() {
         initComponents();
-        
-        DBUtility.SetImage(this,"/utility/images/A.jpg", 1024, 600);
-        this.getRootPane().setBorder(BorderFactory.createMatteBorder(4,4,4,4,Color.ORANGE));
+
+        DBUtility.SetImage(this, "/utility/images/A.jpg", 1024, 600);
+        this.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.ORANGE));
     }
 
     /**
@@ -38,8 +39,8 @@ public class ViewUser extends javax.swing.JFrame {
         lblimage = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         usertable = new javax.swing.JTable();
-        SearchField = new javax.swing.JTextField();
-        btnSearch = new javax.swing.JButton();
+        searchtext = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1000, 376));
@@ -82,14 +83,20 @@ public class ViewUser extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(usertable);
 
-        SearchField.addActionListener(new java.awt.event.ActionListener() {
+        searchtext.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                SearchFieldActionPerformed(evt);
+                searchtextActionPerformed(evt);
+            }
+        });
+        searchtext.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                searchtextKeyReleased(evt);
             }
         });
 
-        btnSearch.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        btnSearch.setText("Search");
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel2.setText("Search");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -109,10 +116,10 @@ public class ViewUser extends javax.swing.JFrame {
                 .addContainerGap(82, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(SearchField, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnSearch)
-                .addGap(134, 134, 134))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addComponent(searchtext, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(224, 224, 224))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -121,10 +128,10 @@ public class ViewUser extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnExit1)
                     .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(SearchField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSearch))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(searchtext, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 295, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -141,27 +148,61 @@ public class ViewUser extends javax.swing.JFrame {
     }//GEN-LAST:event_btnExit1ActionPerformed
 
     private void lblimageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblimageMouseClicked
-       
-        
+
+
     }//GEN-LAST:event_lblimageMouseClicked
 
-    private void SearchFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchFieldActionPerformed
+    private void searchtextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchtextActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_SearchFieldActionPerformed
+    }//GEN-LAST:event_searchtextActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
-        
-    }//GEN-LAST:event_formComponentShown
-    private void fetchUser(String SearchText)throws Exception{
-        DefaultTableModel model =  (DefaultTableModel)usertable.getModel();
-        model.setRowCount(0);
         try{
-            Connection con =ConnectionProvider.getcon();
-            
+            fetchUser(null);
         }catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }//GEN-LAST:event_formComponentShown
+
+    private void searchtextKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchtextKeyReleased
+        try{
+            fetchUser(searchtext.getText());
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }//GEN-LAST:event_searchtextKeyReleased
+    private void fetchUser(String SearchText) throws Exception {
+        DefaultTableModel model = (DefaultTableModel) usertable.getModel();
+        model.setRowCount(0);
+        try {
+            Connection con = ConnectionProvider.getcon();
+            Statement st = con.createStatement();
+            String query = null;
+            if (Objects.isNull(SearchText)) {
+                query = "SELECT * FROM userdetails";
+            } else {
+                query = "SELECT * FROM userdetails WHERE name like '%" + SearchText + "%' or email like '" + SearchText + "%'";
+            }
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                model.addRow(new Object[]{ 
+                    rs.getString("id"),
+                    rs.getString("name"),
+                    rs.getString("gender"),
+                    rs.getString("email"),
+                    rs.getString("contract"), 
+                    rs.getString("address"),
+                    rs.getString("division"),
+                    rs.getString("country"),
+                    rs.getString("unique_registration_id"),
+                    rs.getString("imageName")
+                });
+            }
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "Try something that's went wrong.");
         }
     }
+
     /**
      * @param args the command line arguments
      */
@@ -198,12 +239,12 @@ public class ViewUser extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField SearchField;
     private javax.swing.JButton btnExit1;
-    private javax.swing.JButton btnSearch;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblimage;
+    private javax.swing.JTextField searchtext;
     private javax.swing.JTable usertable;
     // End of variables declaration//GEN-END:variables
 

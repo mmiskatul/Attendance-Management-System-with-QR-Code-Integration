@@ -459,7 +459,7 @@ public class UserRegistration extends javax.swing.JFrame {
                 textcountry.requestFocus();
                 return;
             }
-            String uniqueRegistrationId = "" + System.nanoTime() + System.nanoTime() + System.nanoTime();
+            String uniqueRegistrationId = "" + System.nanoTime() ;
             Connection connection = ConnectionProvider.getcon();
             try {
                 String query = "SELECT email FROM userdetails WHERE email = ?";
