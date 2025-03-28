@@ -401,111 +401,112 @@ public class UserRegistration extends javax.swing.JFrame {
     }//GEN-LAST:event_radiofemaleItemStateChanged
 
     private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
+            Connection connection = null;
+    try {
+        String name = textname.getText().toString();
+        if (name.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Name cannot be empty", "Error", JOptionPane.WARNING_MESSAGE);
+            textname.requestFocus();
+            return;
+        }
+        String gender = "";
+        if (radioMale.isSelected()) {
+            gender = "Male";
+        } else if (radiofemale.isSelected()) {
+            gender = "Female";
+        }
+        if (gender.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Invalid", "Empty Gender", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String email = textemail.getText().toString();
+        String emailRegX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+        if (email.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Email cannot be empty", "Error", JOptionPane.WARNING_MESSAGE);
+            textemail.requestFocus();
+            return;
+        } else if (!email.matches(emailRegX)) {
+            JOptionPane.showMessageDialog(null,
+                    "Please enter a valid email (e.g., user@example.com)",
+                    "Invalid Email",
+                    JOptionPane.ERROR_MESSAGE);
+            textemail.requestFocus();
+            textemail.selectAll();
+            return;
+        }
+        String contract = textcontract.getText().toString();
+        String contractRegX = "^\\d{11}$";
+        if (!contract.matches(contractRegX)) {
+            JOptionPane.showMessageDialog(null, "Invalid Contract Number", "Invalid", JOptionPane.ERROR_MESSAGE);
+            textcontract.requestFocus();
+            return;
+        }
+        String address = textaddress.getText().toString();
+        if (address.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Frist file the address field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+            textaddress.requestFocus();
+            return;
+        }
+        String division = textdivision.getText().toString();
+        if (division.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Frist file the division field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+            textdivision.requestFocus();
+            return;
+        }
+        String country = textcountry.getText().toString();
+        if (division.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Frist file the country field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+            textcountry.requestFocus();
+            return;
+        }
+        String uniqueRegistrationId = "" + System.nanoTime();
+        
+        // Get connection at the start
+        connection = ConnectionProvider.getcon();
+        
+        // Check for duplicate email
+        String query = "SELECT email FROM userdetails WHERE email = ?";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setString(1, email.trim());  
+        ResultSet rs = pst.executeQuery();
+
+        if (rs.next()) {
+            JOptionPane.showMessageDialog(null,
+                    "Email already registered",
+                    "Duplicate",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String imageName = saveImage(email);
+        String insertQuery = "INSERT INTO userdetails(name,gender,email,contract,address,division,country,unique_registration_id,imageName) VALUES(?,?,?,?,?,?,?,?,?)";
+        PreparedStatement preparedstatement = connection.prepareStatement(insertQuery);
+        preparedstatement.setString(1, name);
+        preparedstatement.setString(2, gender);
+        preparedstatement.setString(3, email);
+        preparedstatement.setString(4, contract);
+        preparedstatement.setString(5, address);
+        preparedstatement.setString(6, division);
+        preparedstatement.setString(7, country);
+        preparedstatement.setString(8, uniqueRegistrationId);
+        preparedstatement.setString(9, imageName);
+        preparedstatement.executeUpdate();
+        JOptionPane.showMessageDialog(null, "User Registered Successfully");
+        clearForm();
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+    } finally {
         try {
-            String name = textname.getText().toString();
-            if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Name cannot be empty", "Error", JOptionPane.WARNING_MESSAGE);
-                textname.requestFocus();
-                return;
+            if (connection != null) {
+                connection.close();
             }
-            String gender = "";
-            if (radioMale.isSelected()) {
-                gender = "Male";
-            } else if (radiofemale.isSelected()) {
-                gender = "Female";
-            }
-            if (gender.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Invalid", "Empty Gender", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            String email = textemail.getText().toString();
-            String emailRegX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,}$";
-
-            if (email.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Email cannot be empty", "Error", JOptionPane.WARNING_MESSAGE);
-                textemail.requestFocus();
-                return;
-            } else if (!email.matches(emailRegX)) {
-                JOptionPane.showMessageDialog(null,
-                        "Please enter a valid email (e.g., user@example.com)",
-                        "Invalid Email",
-                        JOptionPane.ERROR_MESSAGE);
-                textemail.requestFocus();
-                textemail.selectAll();
-                return;
-            }
-            String contract = textcontract.getText().toString();
-            String contractRegX = "^\\d{11}$";
-            if (!contract.matches(contractRegX)) {
-                JOptionPane.showMessageDialog(null, "Invalid Contract Number", "Invalid", JOptionPane.ERROR_MESSAGE);
-                textcontract.requestFocus();
-                return;
-            }
-            String address = textaddress.getText().toString();
-            if (address.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Frist file the address field", "Empty Address", JOptionPane.WARNING_MESSAGE);
-                textaddress.requestFocus();
-                return;
-            }
-            String division = textdivision.getText().toString();
-            if (division.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Frist file the division field", "Empty Address", JOptionPane.WARNING_MESSAGE);
-                textdivision.requestFocus();
-                return;
-            }
-            String country = textcountry.getText().toString();
-            if (division.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Frist file the country field", "Empty Address", JOptionPane.WARNING_MESSAGE);
-                textcountry.requestFocus();
-                return;
-            }
-            String uniqueRegistrationId = "" + System.nanoTime() ;
-            Connection connection = ConnectionProvider.getcon();
-            try {
-                String query = "SELECT email FROM userdetails WHERE email = ?";
-                PreparedStatement pst = connection.prepareStatement(query);
-                pst.setString(1, email.trim());  
-
-                ResultSet rs = pst.executeQuery();
-
-                if (rs.next()) {
-                    JOptionPane.showMessageDialog(null,
-                            "Email already registered",
-                            "Duplicate",
-                            JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, ex);
-            } finally {
-                try {
-                    if (connection != null) {
-                        connection.close();
-                    }
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-
-            String imageName = saveImage(email);
-            String insertQuery = "INSERT INTO userdetails(name,gender,email,contract,address,division,country,unique_registration_id,imageName) VALUES(?,?,?,?,?,?,?,?,?)";
-            PreparedStatement preparedstatement = connection.prepareStatement(insertQuery);
-            preparedstatement.setString(1, name);
-            preparedstatement.setString(2, gender);
-            preparedstatement.setString(3, email);
-            preparedstatement.setString(4, contract);
-            preparedstatement.setString(5, address);
-            preparedstatement.setString(6, division);
-            preparedstatement.setString(7, country);
-            preparedstatement.setString(8, uniqueRegistrationId);
-            preparedstatement.setString(9, imageName);
-            preparedstatement.executeUpdate();
-            JOptionPane.showMessageDialog(null, "User Registered Successfully");
-            clearForm();
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+                                          
     }//GEN-LAST:event_btnRegisterActionPerformed
 
     private String saveImage(String email) {
