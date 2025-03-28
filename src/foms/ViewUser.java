@@ -202,7 +202,7 @@ public class ViewUser extends javax.swing.JFrame {
                 System.getProperty("user.dir") + "/images/" + imageName // Full system path
             };
 
-            String[] extensions = {"", ".jpg", ".jpeg", ".png"};
+            String[] extensions = {"", ".jpg"};
 
             File imageFile = null;
 
@@ -220,10 +220,8 @@ public class ViewUser extends javax.swing.JFrame {
                 }
             }
 
-            // 3. Load image if found
             if (imageFile != null) {
                 try {
-                    // 4. Use ImageIO for better error handling
                     BufferedImage img = ImageIO.read(imageFile);
                     if (img != null) {
                         Image scaled = img.getScaledInstance(200, 250, Image.SCALE_SMOOTH);
@@ -274,7 +272,7 @@ public class ViewUser extends javax.swing.JFrame {
                     rs.getString("address"),
                     rs.getString("division"),
                     rs.getString("country"),
-                    rs.getString("imageName") // Must match DB column name exactly
+                    rs.getString("imageName") 
                 });
             }
         } catch (Exception ex) {
