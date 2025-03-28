@@ -6,7 +6,13 @@ import javax.swing.table.DefaultTableModel;
 import utility.DBUtility;
 import java.sql.*;
 import dao.ConnectionProvider;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 /**
@@ -81,6 +87,11 @@ public class ViewUser extends javax.swing.JFrame {
                 "Id", "Name", "Gender", "Email", "Contract", "Address", "Division", "Registration id", "Image Name"
             }
         ));
+        usertable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                usertableMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(usertable);
 
         searchtext.addActionListener(new java.awt.event.ActionListener() {
@@ -157,49 +168,117 @@ public class ViewUser extends javax.swing.JFrame {
     }//GEN-LAST:event_searchtextActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
-        try{
+        try {
             fetchUser(null);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }//GEN-LAST:event_formComponentShown
 
     private void searchtextKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchtextKeyReleased
-        try{
+        try {
             fetchUser(searchtext.getText());
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }//GEN-LAST:event_searchtextKeyReleased
-    private void fetchUser(String SearchText) throws Exception {
+
+    private void usertableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_usertableMouseClicked
+        int index = usertable.getSelectedRow();
+        if (index < 0) {
+            return;
+        }
+
+        String imageName = Objects.toString(usertable.getValueAt(index, 8), "").trim();
+
+        if (!imageName.isEmpty()) {
+            System.out.println("Searching for image: " + imageName);
+
+            // 1. Try multiple locations and extensions
+            String[] possiblePaths = {
+                "images/" + imageName, // Relative path
+                "src/images/" + imageName, // Common IDE source folder
+                "/images/" + imageName, // Absolute path in JAR
+                System.getProperty("user.dir") + "/images/" + imageName // Full system path
+            };
+
+            String[] extensions = {"", ".jpg", ".jpeg", ".png"};
+
+            File imageFile = null;
+
+            // 2. Search through all possible combinations
+            searchLoop:
+            for (String path : possiblePaths) {
+                for (String ext : extensions) {
+                    File testFile = new File(path + ext);
+                    System.out.println("Trying: " + testFile.getAbsolutePath()); // Debug
+
+                    if (testFile.exists()) {
+                        imageFile = testFile;
+                        break searchLoop;
+                    }
+                }
+            }
+
+            // 3. Load image if found
+            if (imageFile != null) {
+                try {
+                    // 4. Use ImageIO for better error handling
+                    BufferedImage img = ImageIO.read(imageFile);
+                    if (img != null) {
+                        Image scaled = img.getScaledInstance(200, 250, Image.SCALE_SMOOTH);
+                        lblimage.setIcon(new ImageIcon(scaled));
+                    } else {
+                        throw new IOException("Image format not supported");
+                    }
+                } catch (Exception e) {
+                    lblimage.setIcon(null);
+                    JOptionPane.showMessageDialog(this,
+                            "Failed to load image: " + e.getMessage(),
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    e.printStackTrace();
+                }
+            } else {
+                lblimage.setIcon(null);
+                JOptionPane.showMessageDialog(this,
+                        "Image not found in any location: " + imageName,
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            lblimage.setIcon(null);
+        }
+
+    }//GEN-LAST:event_usertableMouseClicked
+    private void fetchUser(String searchText) {
         DefaultTableModel model = (DefaultTableModel) usertable.getModel();
         model.setRowCount(0);
-        try {
-            Connection con = ConnectionProvider.getcon();
-            Statement st = con.createStatement();
-            String query = null;
-            if (Objects.isNull(SearchText)) {
-                query = "SELECT * FROM userdetails";
-            } else {
-                query = "SELECT * FROM userdetails WHERE name like '%" + SearchText + "%' or email like '" + SearchText + "%'";
+
+        try (Connection con = ConnectionProvider.getcon(); Statement st = con.createStatement()) {
+
+            String query = "SELECT id, name, gender, email, contract, address, "
+                    + "division, country, unique_registration_id, imageName "
+                    + "FROM userdetails";
+
+            if (searchText != null && !searchText.trim().isEmpty()) {
+                query += " WHERE name LIKE '%" + searchText + "%' OR email LIKE '" + searchText + "%'";
             }
+
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
-                model.addRow(new Object[]{ 
+                model.addRow(new Object[]{
                     rs.getString("id"),
                     rs.getString("name"),
                     rs.getString("gender"),
                     rs.getString("email"),
-                    rs.getString("contract"), 
+                    rs.getString("contract"),
                     rs.getString("address"),
                     rs.getString("division"),
                     rs.getString("country"),
-                    rs.getString("unique_registration_id"),
-                    rs.getString("imageName")
+                    rs.getString("imageName") // Must match DB column name exactly
                 });
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Try something that's went wrong.");
+            ex.printStackTrace();
         }
     }
 
