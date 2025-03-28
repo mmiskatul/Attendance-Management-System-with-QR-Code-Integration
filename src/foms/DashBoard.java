@@ -1,4 +1,3 @@
-
 package foms;
 
 import java.awt.Color;
@@ -16,9 +15,9 @@ public class DashBoard extends javax.swing.JFrame {
      */
     public DashBoard() {
         initComponents();
-        DBUtility.SetImage(this,"/utility/images/A.jpg", 1024, 600);
-        this.getRootPane().setBorder(BorderFactory.createMatteBorder(4,4,4,4,Color.BLACK));
-        
+        DBUtility.SetImage(this, "/utility/images/A.jpg", 1024, 600);
+        this.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.YELLOW));
+
     }
 
     /**
@@ -124,11 +123,11 @@ public class DashBoard extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnRegisterUser, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
                 .addComponent(btnviewuser)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addComponent(btnupdateuser)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(34, 34, 34)
                 .addComponent(btndeleteuser)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btngenerateqr)
@@ -155,7 +154,7 @@ public class DashBoard extends javax.swing.JFrame {
                     .addComponent(btnviewqrs, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnmarkattendance, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnviewattendance, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(365, Short.MAX_VALUE))
+                .addContainerGap(551, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addComponent(btnExit1)
                 .addGap(0, 0, Short.MAX_VALUE))
@@ -166,11 +165,11 @@ public class DashBoard extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnRegisterUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterUserActionPerformed
-       DBUtility.openForm(UserRegistration.class.getSimpleName(), new UserRegistration());
+        DBUtility.openForm(UserRegistration.class.getSimpleName(), new UserRegistration());
     }//GEN-LAST:event_btnRegisterUserActionPerformed
 
     private void btnviewuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnviewuserActionPerformed
-        // TODO add your handling code here:
+        DBUtility.openForm(ViewUser.class.getSimpleName(), new ViewUser());
     }//GEN-LAST:event_btnviewuserActionPerformed
 
     private void btnupdateuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnupdateuserActionPerformed
