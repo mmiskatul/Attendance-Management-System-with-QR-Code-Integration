@@ -1,6 +1,6 @@
-
 package foms;
 
+import dao.ConnectionProvider;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -9,7 +9,10 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import utility.DBUtility;
+import java.sql.Connection;
+import java.sql.*;
 
 /**
  *
@@ -22,8 +25,8 @@ public class UserRegistration extends javax.swing.JFrame {
      */
     public UserRegistration() {
         initComponents();
-        DBUtility.SetImage(this,"/utility/images/A.jpg", 760, 500);
-        this.getRootPane().setBorder(BorderFactory.createMatteBorder(4,4,4,4,Color.YELLOW));
+        DBUtility.SetImage(this, "/utility/images/A.jpg", 760, 500);
+        this.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.YELLOW));
     }
 
     /**
@@ -55,7 +58,7 @@ public class UserRegistration extends javax.swing.JFrame {
         textcountry = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         btnRegister = new javax.swing.JButton();
-        btnRegister1 = new javax.swing.JButton();
+        btnclear = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(760, 400));
@@ -90,6 +93,11 @@ public class UserRegistration extends javax.swing.JFrame {
         radioMale.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         radioMale.setForeground(new java.awt.Color(255, 255, 255));
         radioMale.setText("Male");
+        radioMale.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                radioMaleItemStateChanged(evt);
+            }
+        });
         radioMale.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radioMaleActionPerformed(evt);
@@ -99,6 +107,11 @@ public class UserRegistration extends javax.swing.JFrame {
         radiofemale.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         radiofemale.setForeground(new java.awt.Color(255, 255, 255));
         radiofemale.setText("Female");
+        radiofemale.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                radiofemaleItemStateChanged(evt);
+            }
+        });
         radiofemale.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radiofemaleActionPerformed(evt);
@@ -182,12 +195,17 @@ public class UserRegistration extends javax.swing.JFrame {
 
         btnRegister.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         btnRegister.setText("Register");
-
-        btnRegister1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        btnRegister1.setText("Clear");
-        btnRegister1.addActionListener(new java.awt.event.ActionListener() {
+        btnRegister.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnRegister1ActionPerformed(evt);
+                btnRegisterActionPerformed(evt);
+            }
+        });
+
+        btnclear.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btnclear.setText("Clear");
+        btnclear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnclearActionPerformed(evt);
             }
         });
 
@@ -241,7 +259,7 @@ public class UserRegistration extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnRegister, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGap(28, 28, 28)
-                                .addComponent(btnRegister1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(btnclear, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jInternalFrame1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(30, 30, 30)))
                 .addGap(39, 39, 39))
@@ -260,7 +278,7 @@ public class UserRegistration extends javax.swing.JFrame {
                         .addGap(56, 56, 56)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnRegister, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnRegister1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(btnclear, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
@@ -298,7 +316,7 @@ public class UserRegistration extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
-       this.dispose();
+        this.dispose();
     }//GEN-LAST:event_btnExitActionPerformed
 
     private void textnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textnameActionPerformed
@@ -333,44 +351,193 @@ public class UserRegistration extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_textcountryActionPerformed
 
-    private void btnRegister1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegister1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnRegister1ActionPerformed
-    BufferedImage originalImage=null;
-    File selectedfile=null;
-    
+    private void btnclearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnclearActionPerformed
+        clearForm();
+    }//GEN-LAST:event_btnclearActionPerformed
+    BufferedImage originalImage = null;
+    File selectedfile = null;
+
     private void lblimageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblimageMouseClicked
-        JFileChooser filechoser= new JFileChooser();
-        int result =filechoser.showOpenDialog(this);
-        if(result == JFileChooser.APPROVE_OPTION){
-            selectedfile =filechoser.getSelectedFile();
-            try{
-                originalImage=ImageIO.read(selectedfile);
-                
-                int originalWidth=originalImage.getWidth();
-                int originalHeight=originalImage.getHeight();
-                
-                int labelwidth=lblimage.getWidth();
-                int labelHeight=lblimage.getHeight();
-                
-                double scaleX =(double)labelwidth/originalWidth;
-                double scaleY =(double)labelHeight/originalHeight;
-                double scale=Math.min(scaleX, scaleY);
-                
-                int scaledWidth = (int)(originalWidth *scale);
-                int scaledHeight =(int)(originalHeight*scale);
-                Image scaledImage=originalImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
-                
-                ImageIcon icon= new ImageIcon(scaledImage);
+        JFileChooser filechoser = new JFileChooser();
+        int result = filechoser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            selectedfile = filechoser.getSelectedFile();
+            try {
+                originalImage = ImageIO.read(selectedfile);
+
+                int originalWidth = originalImage.getWidth();
+                int originalHeight = originalImage.getHeight();
+
+                int labelwidth = lblimage.getWidth();
+                int labelHeight = lblimage.getHeight();
+
+                double scaleX = (double) labelwidth / originalWidth;
+                double scaleY = (double) labelHeight / originalHeight;
+                double scale = Math.min(scaleX, scaleY);
+
+                int scaledWidth = (int) (originalWidth * scale);
+                int scaledHeight = (int) (originalHeight * scale);
+                Image scaledImage = originalImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+
+                ImageIcon icon = new ImageIcon(scaledImage);
                 lblimage.setIcon(icon);
-                
-                
-                
-            }catch(Exception ex){
+
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
     }//GEN-LAST:event_lblimageMouseClicked
+
+    private void radioMaleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_radioMaleItemStateChanged
+        if (radioMale.isSelected()) {
+            radiofemale.setSelected(false);
+        }
+    }//GEN-LAST:event_radioMaleItemStateChanged
+
+    private void radiofemaleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_radiofemaleItemStateChanged
+        if (radiofemale.isSelected()) {
+            radioMale.setSelected(false);
+        }
+    }//GEN-LAST:event_radiofemaleItemStateChanged
+
+    private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
+        try {
+            String name = textname.getText().toString();
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Name cannot be empty", "Error", JOptionPane.WARNING_MESSAGE);
+                textname.requestFocus();
+                return;
+            }
+            String gender = "";
+            if (radioMale.isSelected()) {
+                gender = "Male";
+            } else if (radiofemale.isSelected()) {
+                gender = "Female";
+            }
+            if (gender.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Invalid", "Empty Gender", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String email = textemail.getText().toString();
+            String emailRegX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+            if (email.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Email cannot be empty", "Error", JOptionPane.WARNING_MESSAGE);
+                textemail.requestFocus();
+                return;
+            } else if (!email.matches(emailRegX)) {
+                JOptionPane.showMessageDialog(null,
+                        "Please enter a valid email (e.g., user@example.com)",
+                        "Invalid Email",
+                        JOptionPane.ERROR_MESSAGE);
+                textemail.requestFocus();
+                textemail.selectAll();
+                return;
+            }
+            String contract = textcontract.getText().toString();
+            String contractRegX = "^\\d{11}$";
+            if (!contract.matches(contractRegX)) {
+                JOptionPane.showMessageDialog(null, "Invalid Contract Number", "Invalid", JOptionPane.ERROR_MESSAGE);
+                textcontract.requestFocus();
+                return;
+            }
+            String address = textaddress.getText().toString();
+            if (address.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Frist file the address field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+                textaddress.requestFocus();
+                return;
+            }
+            String division = textdivision.getText().toString();
+            if (division.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Frist file the division field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+                textdivision.requestFocus();
+                return;
+            }
+            String country = textcountry.getText().toString();
+            if (division.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Frist file the country field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+                textcountry.requestFocus();
+                return;
+            }
+            String uniqueRegistrationId = "" + System.nanoTime() ;
+            Connection connection = ConnectionProvider.getcon();
+            try {
+                String query = "SELECT email FROM userdetails WHERE email = ?";
+                PreparedStatement pst = connection.prepareStatement(query);
+                pst.setString(1, email.trim());  
+
+                ResultSet rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    JOptionPane.showMessageDialog(null,
+                            "Email already registered",
+                            "Duplicate",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, ex);
+            } finally {
+                try {
+                    if (connection != null) {
+                        connection.close();
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            String imageName = saveImage(email);
+            String insertQuery = "INSERT INTO userdetails(name,gender,email,contract,address,division,country,unique_registration_id,imageName) VALUES(?,?,?,?,?,?,?,?,?)";
+            PreparedStatement preparedstatement = connection.prepareStatement(insertQuery);
+            preparedstatement.setString(1, name);
+            preparedstatement.setString(2, gender);
+            preparedstatement.setString(3, email);
+            preparedstatement.setString(4, contract);
+            preparedstatement.setString(5, address);
+            preparedstatement.setString(6, division);
+            preparedstatement.setString(7, country);
+            preparedstatement.setString(8, uniqueRegistrationId);
+            preparedstatement.setString(9, imageName);
+            preparedstatement.executeUpdate();
+            JOptionPane.showMessageDialog(null, "User Registered Successfully");
+            clearForm();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }//GEN-LAST:event_btnRegisterActionPerformed
+
+    private String saveImage(String email) {
+        if (originalImage != null && selectedfile != null) {
+            try {
+                String savePath = DBUtility.getPath("images\\");
+                String extension = DBUtility.getFileExtension(selectedfile.getName());
+                String imageName = email + "." + extension;
+                File savefile = new File(savePath + imageName);
+                BufferedImage scaledImage = DBUtility.scaleImage(originalImage, ImageIO.read(selectedfile));
+                ImageIO.write(scaledImage, extension, savefile);
+                return imageName;
+
+            } catch (Exception ex) {
+
+            }
+        }
+        return null;
+    }
+
+    private void clearForm() {
+        textname.setText("");
+        textemail.setText("");
+        textcontract.setText("");
+        textaddress.setText("");
+        textdivision.setText("");
+        textcountry.setText("");
+        radioMale.setSelected(false);
+        radiofemale.setSelected(false);
+        lblimage.setIcon(null);
+
+    }
 
     /**
      * @param args the command line arguments
@@ -410,7 +577,7 @@ public class UserRegistration extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnRegister;
-    private javax.swing.JButton btnRegister1;
+    private javax.swing.JButton btnclear;
     private javax.swing.JInternalFrame jInternalFrame1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
