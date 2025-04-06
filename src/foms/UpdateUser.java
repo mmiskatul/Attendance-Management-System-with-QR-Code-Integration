@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package foms;
 
 import dao.ConnectionProvider;
@@ -31,8 +27,8 @@ public class UpdateUser extends javax.swing.JFrame {
 
     String uniReg = null;
     String existingImageName = null;
-    BufferedImage originalimages=null;
-    File selectedFile=null;
+    BufferedImage originalimages = null;
+    File selectedFile = null;
 
     public UpdateUser() {
         initComponents();
@@ -359,39 +355,39 @@ public class UpdateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_textaddressActionPerformed
 
     private void lblimageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblimageMouseClicked
-        JDialog dialog=new JDialog();
+        JDialog dialog = new JDialog();
         dialog.setUndecorated(true);
-        dialog.setSize(500,400);
-        JFileChooser filechooser =new JFileChooser();
-        FileNameExtensionFilter filter= new FileNameExtensionFilter ("JPG Images","jpg");
+        dialog.setSize(500, 400);
+        JFileChooser filechooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG Images", "jpg");
         filechooser.setFileFilter(filter);
-        filechooser.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                if(e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)){
-                    selectedFile =filechooser.getSelectedFile();
-                    try{
-                        originalimages=ImageIO.read(selectedFile);
-                        
-                        int originalWidth =originalimages.getWidth();
-                        int originalHeight=originalimages.getHeight();
-                        
-                        int labelwidth=lblimage.getWidth();
-                        int labelHeight=lblimage.getHeight();
-                        
-                         double scaleX=(double)labelwidth/originalWidth;
-                         double scaley=(double)labelHeight/originalHeight;
-                         
-                        double scale=Math.min(scaleX, scaley); 
-                        int scaledWidth=(int)(originalWidth*scale);
-                        int scaledHeight=(int)(originalHeight*scale);
-                        Image scaledimage =originalimages.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
-                        ImageIcon icon =new ImageIcon(scaledimage);
+        filechooser.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
+                    selectedFile = filechooser.getSelectedFile();
+                    try {
+                        originalimages = ImageIO.read(selectedFile);
+
+                        int originalWidth = originalimages.getWidth();
+                        int originalHeight = originalimages.getHeight();
+
+                        int labelwidth = lblimage.getWidth();
+                        int labelHeight = lblimage.getHeight();
+
+                        double scaleX = (double) labelwidth / originalWidth;
+                        double scaley = (double) labelHeight / originalHeight;
+
+                        double scale = Math.min(scaleX, scaley);
+                        int scaledWidth = (int) (originalWidth * scale);
+                        int scaledHeight = (int) (originalHeight * scale);
+                        Image scaledimage = originalimages.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+                        ImageIcon icon = new ImageIcon(scaledimage);
                         lblimage.setIcon(icon);
-                        
-                    }catch(IOException ex){
+
+                    } catch (IOException ex) {
                         ex.printStackTrace();
                     }
-                    
+
                 }
                 dialog.dispose();
             }
@@ -399,7 +395,7 @@ public class UpdateUser extends javax.swing.JFrame {
         dialog.add(filechooser);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
-        
+
     }//GEN-LAST:event_lblimageMouseClicked
 
     private void textdivisionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textdivisionActionPerformed
@@ -435,9 +431,115 @@ public class UpdateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_textemailActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        try {
+            String name = textname.getText().toString();
+            String gender = "";
+            if (radioMale.isSelected()) {
+                gender = "Male";
+            } else if (radiofemale.isSelected()) {
+                gender = "Female";
+            }
+            String email = textemail.getText().toString();
+            String emailRegX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,}$";
+            if (email.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Email cannot be empty", "Error", JOptionPane.WARNING_MESSAGE);
+                textemail.requestFocus();
+                return;
+            } else if (!email.matches(emailRegX)) {
+                JOptionPane.showMessageDialog(null,
+                        "Please enter a valid email (e.g., user@example.com)",
+                        "Invalid Email",
+                        JOptionPane.ERROR_MESSAGE);
+                textemail.requestFocus();
+                textemail.selectAll();
+                return;
+            }
+            String contract = textcontract.getText().toString();
+            String contractRegX = "^\\d{11}$";
+            if (!contract.matches(contractRegX)) {
+                JOptionPane.showMessageDialog(null, "Invalid Contract Number", "Invalid", JOptionPane.ERROR_MESSAGE);
+                textcontract.requestFocus();
+                return;
+            }
+            String address = textaddress.getText().toString();
+            if (address.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Frist file the address field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+                textaddress.requestFocus();
+                return;
+            }
+            String division = textdivision.getText().toString();
+            if (division.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Frist file the division field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+                textdivision.requestFocus();
+                return;
+            }
+            String country = textcountry.getText().toString();
+            if (division.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Frist file the country field", "Empty Address", JOptionPane.WARNING_MESSAGE);
+                textcountry.requestFocus();
+                return;
+            }
 
+            Connection con = ConnectionProvider.getcon();
+            try {
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery("SELECT * FROM userdetails WHERE email ='" + email + "'");
+                if (!rs.next()) {
+                    JOptionPane.showMessageDialog(null, "Email not found", "NOT FOUND", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, ex);
+            }
+            String imageName = saveImage(email);
+            String updateQuerry;
+            if (imageName != null) {
+                updateQuerry = "UPDATE userdetails SET name=?,gender=?,contract=?,address=?,division=?,country=?,imageName =? where unique_registration_id=? ";
+
+            } else {
+                updateQuerry = "UPDATE userdetails SET name=?,gender=?,contract=?,address=?,division=?,country=? where unique_registration_id=? ";
+            }
+           
+                PreparedStatement preparedStatement=con.prepareStatement(updateQuerry);
+                preparedStatement.setString(1, name);
+                preparedStatement.setString(2, gender);
+                preparedStatement.setString(3, contract);
+                preparedStatement.setString(4, address);
+                preparedStatement.setString(5, division);
+                preparedStatement.setString(6, country);
+
+                if (imageName != null) {
+                    preparedStatement.setString(7, imageName);
+                    preparedStatement.setString(8, uniReg);
+                } else {
+                    preparedStatement.setString(7, uniReg);
+                }
+
+                preparedStatement.executeUpdate();
+                JOptionPane.showMessageDialog(null, "User Updated Successfully .","Confirmtion",JOptionPane.INFORMATION_MESSAGE);
+                clearForm();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }//GEN-LAST:event_btnUpdateActionPerformed
+    private String saveImage(String email) {
+        if (originalimages != null && selectedFile != null) {
+            try {
+                String savePath = DBUtility.getPath("images\\");
+                String extension = DBUtility.getFileExtension(selectedFile.getName());
+                String imageName = email + "." + extension;
+                File savefile = new File(savePath + imageName);
+                BufferedImage scaledImage = DBUtility.scaleImage(originalimages, ImageIO.read(selectedFile));
+                ImageIO.write(scaledImage, extension, savefile);
+                return imageName;
 
+            } catch (Exception ex) {
+
+            }
+        }
+        return null;
+    }
     private void textcontractActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textcontractActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_textcontractActionPerformed
@@ -445,7 +547,7 @@ public class UpdateUser extends javax.swing.JFrame {
     private void btnclearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnclearActionPerformed
         clearForm();
     }//GEN-LAST:event_btnclearActionPerformed
-     private void clearForm() {
+    private void clearForm() {
         textname.setText("");
         textemail.setText("");
         textcontract.setText("");
@@ -457,6 +559,7 @@ public class UpdateUser extends javax.swing.JFrame {
         lblimage.setIcon(null);
 
     }
+
     private void textnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textnameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_textnameActionPerformed
