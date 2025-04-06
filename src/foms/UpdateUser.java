@@ -16,6 +16,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import utility.DBUtility;
 import java.sql.*;
+import java.util.Objects;
 
 /**
  *
@@ -23,9 +24,8 @@ import java.sql.*;
  */
 public class UpdateUser extends javax.swing.JFrame {
 
-    /**
-     * Creates new form UpdateUser
-     */
+       String uniReg = null;
+        String existingImageName = null;
     public UpdateUser() {
         initComponents();
         DBUtility.SetImage(this, "/utility/images/A.jpg", 760, 534);
@@ -351,7 +351,7 @@ public class UpdateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_textaddressActionPerformed
 
     private void lblimageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblimageMouseClicked
-        
+
     }//GEN-LAST:event_lblimageMouseClicked
 
     private void textdivisionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textdivisionActionPerformed
@@ -387,7 +387,7 @@ public class UpdateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_textemailActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        
+
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void textcontractActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textcontractActionPerformed
@@ -395,13 +395,13 @@ public class UpdateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_textcontractActionPerformed
 
     private void btnclearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnclearActionPerformed
-        
+
     }//GEN-LAST:event_btnclearActionPerformed
 
     private void textnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textnameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_textnameActionPerformed
-    String uniReg=null; 
+
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         String email = textemail.getText().toString();
         String emailRegX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,}$";
@@ -424,20 +424,34 @@ public class UpdateUser extends javax.swing.JFrame {
             ResultSet rs = st.executeQuery("SELECT * FROM userdetails where email='" + email + "'");
             if (rs.next()) {
                 textname.setText(rs.getString("name"));
-               if(rs.getString("gender").equalsIgnoreCase("Male")){
-                   radioMale.setSelected(true);
-                   radiofemale.setSelected(false);
-               }else{
-                   radiofemale.setSelected(true);
-                   radioMale.setSelected(false);
-               }
-               textcontract.setText(rs.getString("contract"));
-               textaddress.setText(rs.getString("address"));
-               textdivision.setText(rs.getString("division"));
-               textcountry.setText(rs.getString("country"));
-               uniReg =rs.getString("unique_registration_id");
-               String imageName=rs.getString("imageName");
-               
+                if (rs.getString("gender").equalsIgnoreCase("Male")) {
+                    radioMale.setSelected(true);
+                    radiofemale.setSelected(false);
+                } else {
+                    radiofemale.setSelected(true);
+                    radioMale.setSelected(false);
+                }
+                textcontract.setText(rs.getString("contract"));
+                textaddress.setText(rs.getString("address"));
+                textdivision.setText(rs.getString("division"));
+                textcountry.setText(rs.getString("country"));
+                uniReg = rs.getString("unique_registration_id");
+                String imageName = rs.getString("imageName");
+                existingImageName = Objects.isNull(imageName) || imageName.isEmpty() ? null : imageName;
+                if (!Objects.isNull(existingImageName)) {
+                    String imagePath=DBUtility.getPath("images"+File.separator+existingImageName);
+                    File imagefile =new File(imagePath);
+                    if(imagefile.exists()){
+                           ImageIcon imageicon=new ImageIcon(imagePath);
+                           Image image=imageicon.getImage().getScaledInstance(201,182,Image.SCALE_SMOOTH);
+                           ImageIcon resizedIcon =new ImageIcon(image);
+                           lblimage.setIcon(resizedIcon);
+                    }else{
+                        lblimage.setIcon(null);
+                    }
+                } else {
+                    lblimage.setIcon(null);
+                }
             } else {
                 JOptionPane.showMessageDialog(null, "email is not found", "NOT FOUND", JOptionPane.WARNING_MESSAGE);
             }
