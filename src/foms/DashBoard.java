@@ -173,7 +173,7 @@ public class DashBoard extends javax.swing.JFrame {
     }//GEN-LAST:event_btnviewuserActionPerformed
 
     private void btnupdateuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnupdateuserActionPerformed
-        // TODO add your handling code here:
+        DBUtility.openForm(UpdateUser.class.getSimpleName(), new UpdateUser());
     }//GEN-LAST:event_btnupdateuserActionPerformed
 
     private void btngenerateqrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btngenerateqrActionPerformed
