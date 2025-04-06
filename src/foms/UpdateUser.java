@@ -7,8 +7,11 @@ package foms;
 import dao.ConnectionProvider;
 import java.awt.Color;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -17,6 +20,8 @@ import javax.swing.JOptionPane;
 import utility.DBUtility;
 import java.sql.*;
 import java.util.Objects;
+import javax.swing.JDialog;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -24,8 +29,11 @@ import java.util.Objects;
  */
 public class UpdateUser extends javax.swing.JFrame {
 
-       String uniReg = null;
-        String existingImageName = null;
+    String uniReg = null;
+    String existingImageName = null;
+    BufferedImage originalimages=null;
+    File selectedFile=null;
+
     public UpdateUser() {
         initComponents();
         DBUtility.SetImage(this, "/utility/images/A.jpg", 760, 534);
@@ -351,7 +359,47 @@ public class UpdateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_textaddressActionPerformed
 
     private void lblimageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblimageMouseClicked
-
+        JDialog dialog=new JDialog();
+        dialog.setUndecorated(true);
+        dialog.setSize(500,400);
+        JFileChooser filechooser =new JFileChooser();
+        FileNameExtensionFilter filter= new FileNameExtensionFilter ("JPG Images","jpg");
+        filechooser.setFileFilter(filter);
+        filechooser.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                if(e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)){
+                    selectedFile =filechooser.getSelectedFile();
+                    try{
+                        originalimages=ImageIO.read(selectedFile);
+                        
+                        int originalWidth =originalimages.getWidth();
+                        int originalHeight=originalimages.getHeight();
+                        
+                        int labelwidth=lblimage.getWidth();
+                        int labelHeight=lblimage.getHeight();
+                        
+                         double scaleX=(double)labelwidth/originalWidth;
+                         double scaley=(double)labelHeight/originalHeight;
+                         
+                        double scale=Math.min(scaleX, scaley); 
+                        int scaledWidth=(int)(originalWidth*scale);
+                        int scaledHeight=(int)(originalHeight*scale);
+                        Image scaledimage =originalimages.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+                        ImageIcon icon =new ImageIcon(scaledimage);
+                        lblimage.setIcon(icon);
+                        
+                    }catch(IOException ex){
+                        ex.printStackTrace();
+                    }
+                    
+                }
+                dialog.dispose();
+            }
+        });
+        dialog.add(filechooser);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+        
     }//GEN-LAST:event_lblimageMouseClicked
 
     private void textdivisionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textdivisionActionPerformed
@@ -395,9 +443,20 @@ public class UpdateUser extends javax.swing.JFrame {
     }//GEN-LAST:event_textcontractActionPerformed
 
     private void btnclearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnclearActionPerformed
-
+        clearForm();
     }//GEN-LAST:event_btnclearActionPerformed
+     private void clearForm() {
+        textname.setText("");
+        textemail.setText("");
+        textcontract.setText("");
+        textaddress.setText("");
+        textdivision.setText("");
+        textcountry.setText("");
+        radioMale.setSelected(false);
+        radiofemale.setSelected(false);
+        lblimage.setIcon(null);
 
+    }
     private void textnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textnameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_textnameActionPerformed
@@ -439,14 +498,14 @@ public class UpdateUser extends javax.swing.JFrame {
                 String imageName = rs.getString("imageName");
                 existingImageName = Objects.isNull(imageName) || imageName.isEmpty() ? null : imageName;
                 if (!Objects.isNull(existingImageName)) {
-                    String imagePath=DBUtility.getPath("images"+File.separator+existingImageName);
-                    File imagefile =new File(imagePath);
-                    if(imagefile.exists()){
-                           ImageIcon imageicon=new ImageIcon(imagePath);
-                           Image image=imageicon.getImage().getScaledInstance(201,182,Image.SCALE_SMOOTH);
-                           ImageIcon resizedIcon =new ImageIcon(image);
-                           lblimage.setIcon(resizedIcon);
-                    }else{
+                    String imagePath = DBUtility.getPath("images" + File.separator + existingImageName);
+                    File imagefile = new File(imagePath);
+                    if (imagefile.exists()) {
+                        ImageIcon imageicon = new ImageIcon(imagePath);
+                        Image image = imageicon.getImage().getScaledInstance(201, 182, Image.SCALE_SMOOTH);
+                        ImageIcon resizedIcon = new ImageIcon(image);
+                        lblimage.setIcon(resizedIcon);
+                    } else {
                         lblimage.setIcon(null);
                     }
                 } else {
