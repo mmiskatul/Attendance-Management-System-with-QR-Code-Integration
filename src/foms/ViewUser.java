@@ -194,19 +194,16 @@ public class ViewUser extends javax.swing.JFrame {
         if (!imageName.isEmpty()) {
             System.out.println("Searching for image: " + imageName);
 
-            // 1. Try multiple locations and extensions
             String[] possiblePaths = {
-                "images/" + imageName, // Relative path
-                "src/images/" + imageName, // Common IDE source folder
-                "/images/" + imageName, // Absolute path in JAR
-                System.getProperty("user.dir") + "/images/" + imageName // Full system path
+                "images/" + imageName,
+                "src/images/" + imageName, 
+                "/images/" + imageName, 
+                System.getProperty("user.dir") + "/images/" + imageName 
             };
 
             String[] extensions = {"", ".jpg"};
 
             File imageFile = null;
-
-            // 2. Search through all possible combinations
             searchLoop:
             for (String path : possiblePaths) {
                 for (String ext : extensions) {
