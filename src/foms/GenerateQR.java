@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dao.ConnectionProvider;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import javax.swing.BorderFactory;
 import javax.swing.table.DefaultTableModel;
 import utility.DBUtility;
@@ -34,8 +35,8 @@ public class GenerateQR extends javax.swing.JFrame {
         lblimage = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         usertable = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btnsaveqr = new javax.swing.JButton();
+        btnsaveqrat = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(760, 434));
@@ -102,16 +103,16 @@ public class GenerateQR extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(usertable);
 
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton1.setText("Save");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnsaveqr.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnsaveqr.setText("Save");
+        btnsaveqr.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnsaveqrActionPerformed(evt);
             }
         });
 
-        jButton2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton2.setText("Save QR at");
+        btnsaveqrat.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnsaveqrat.setText("Save QR at");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -132,9 +133,9 @@ public class GenerateQR extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(6, 6, 6)
-                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(btnsaveqr, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(btnsaveqrat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addComponent(jInternalFrame1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(44, 44, 44))))
         );
@@ -151,8 +152,8 @@ public class GenerateQR extends javax.swing.JFrame {
                         .addComponent(jInternalFrame1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton1)
-                            .addComponent(jButton2)))
+                            .addComponent(btnsaveqr)
+                            .addComponent(btnsaveqrat)))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(44, Short.MAX_VALUE))
         );
@@ -169,9 +170,30 @@ public class GenerateQR extends javax.swing.JFrame {
 
     }//GEN-LAST:event_lblimageMouseClicked
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void btnsaveqrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnsaveqrActionPerformed
+        try {
+            if (out == null) {
+                JOptionPane.showMessageDialog(this, "NO QR generat");
+                return;
+            }
+            String defaultDir = DBUtility.getPath("qrCode");
+            File directory = new File(defaultDir);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            File defaultFile = new File(directory, email + ".jpg");
+            try {
+                java.nio.file.Files.write(defaultFile.toPath(), out.toByteArray());
+                JOptionPane.showMessageDialog(null, "QR CODE Save Successfully!");
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error Saving QR COde ", "Error", JOptionPane.ERROR_MESSAGE);
+
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Something Went wrong !");
+        }
+    }//GEN-LAST:event_btnsaveqrActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         try {
@@ -196,39 +218,38 @@ public class GenerateQR extends javax.swing.JFrame {
             }
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Something went wrong .");
+            ex.printStackTrace();
         }
 
     }//GEN-LAST:event_formComponentShown
     ByteArrayOutputStream out = null;
-    String email=null;
+    String email = null;
     private void usertableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_usertableMouseClicked
-        int index =usertable.getSelectedRow();
-        TableModel model=usertable.getModel();
-        String id=model.getValueAt(index, 0).toString();
-        String name=model.getValueAt(index, 1).toString();
-        email=model.getValueAt(index, 2).toString();
-        String registrationId=model.getValueAt(index, 8).toString();
-        
-        
-        Map<String,String>data =new HashMap<>();
+        int index = usertable.getSelectedRow();
+        TableModel model = usertable.getModel();
+        String id = model.getValueAt(index, 0).toString();
+        String name = model.getValueAt(index, 1).toString();
+        email = model.getValueAt(index, 3).toString();
+        String registrationId = model.getValueAt(index, 8).toString();
+
+        Map<String, String> data = new HashMap<>();
         data.put("id", id);
         data.put("name", name);
         data.put("email", email);
         data.put("unique_registration_id", registrationId);
-        Gson gson=new Gson();
-        String jsondata=gson.toJson(data);
-        out =QRCode.from(jsondata).withSize(204, 182).to(ImageType.PNG).stream();
-        try{
-            byte[] imageData=out.toByteArray();
-            ImageIcon icon=new ImageIcon(imageData);
+        Gson gson = new Gson();
+        String jsondata = gson.toJson(data);
+        out = QRCode.from(jsondata).withSize(204, 182).to(ImageType.PNG).stream();
+        try {
+            byte[] imageData = out.toByteArray();
+            ImageIcon icon = new ImageIcon(imageData);
             lblimage.setIcon(icon);
-            
-        }catch(Exception ex){
+
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, name);
         }
-        
-        
+
+
     }//GEN-LAST:event_usertableMouseClicked
 
     /**
@@ -268,8 +289,8 @@ public class GenerateQR extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExit;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btnsaveqr;
+    private javax.swing.JButton btnsaveqrat;
     private javax.swing.JInternalFrame jInternalFrame1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
