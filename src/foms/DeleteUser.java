@@ -3,12 +3,14 @@ package foms;
 import dao.ConnectionProvider;
 import java.awt.Color;
 import java.awt.HeadlessException;
+import java.io.File;
 import javax.swing.BorderFactory;
 import utility.DBUtility;
 import java.sql.*;
 import java.util.Objects;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -45,7 +47,6 @@ public class DeleteUser extends javax.swing.JFrame {
         setMaximumSize(new java.awt.Dimension(760, 434));
         setMinimumSize(new java.awt.Dimension(760, 434));
         setUndecorated(true);
-        setPreferredSize(new java.awt.Dimension(760, 434));
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
                 formComponentShown(evt);
@@ -75,6 +76,11 @@ public class DeleteUser extends javax.swing.JFrame {
                 "ID", "Name", "Gender", "Email", "Contract", "Address", "Division", "Country", "registration ID", "Image Name"
             }
         ));
+        usertable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                usertableMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(usertable);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -151,14 +157,42 @@ public class DeleteUser extends javax.swing.JFrame {
     }//GEN-LAST:event_formComponentShown
 
     private void textsearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textsearchKeyReleased
-        String serachtext =textsearch.getText().toString();
-        if(Objects.isNull(serachtext) || serachtext.isEmpty()){
+        String serachtext = textsearch.getText().toString();
+        if (Objects.isNull(serachtext) || serachtext.isEmpty()) {
             fetchUser(null);
-        }else{
+        } else {
             fetchUser(serachtext);
         }
-        
+
     }//GEN-LAST:event_textsearchKeyReleased
+
+    private void usertableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_usertableMouseClicked
+        try {
+            int dialogresult = JOptionPane.showConfirmDialog(null, "* User details \n* Images\n* QR codes \n* Attendance \n\n Associated with this user will be deleted \n Are you sure you want to proceed? ", "Confirmation", JOptionPane.YES_NO_OPTION);
+            if (dialogresult == JOptionPane.YES_OPTION) {
+                int index = usertable.getSelectedRow();
+                TableModel model = usertable.getModel();
+                String email = model.getValueAt(index, 3).toString();
+                String imagepath = DBUtility.getPath("/images" + File.separator + email + ".jpg");
+                deleteFile(imagepath);
+                imagepath = DBUtility.getPath("/qrCode" + File.separator + email + ".jpg");
+                deleteFile(imagepath);
+                Connection con = ConnectionProvider.getcon();
+                Statement st = con.createStatement();
+                String attendaceDeleted = "DELETE userattendance,userdetails FROM userdetails LEFT JOIN userattendance on userattendance.user_id=userdetails.id WHERE userdetails.email=?";
+                PreparedStatement ps=con.prepareStatement(attendaceDeleted);
+                ps.setString(1, email);
+                ps.executeUpdate();
+                fetchUser(null);
+                JOptionPane.showMessageDialog(null, "User Delete Successfully","Confirmation",JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Delete Canceled", "Confirmation", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+
+        }
+    }//GEN-LAST:event_usertableMouseClicked
     private void fetchUser(String SerachText) throws HeadlessException {
         DefaultTableModel model = (DefaultTableModel) usertable.getModel();
         model.setRowCount(0);
@@ -171,23 +205,36 @@ public class DeleteUser extends javax.swing.JFrame {
             } else {
                 querry = "SELECT * FROM userdetails WHERE name LIKE '%" + SerachText + "%' or email LIKE '%" + SerachText + "%'";
             }
-           ResultSet rs= st.executeQuery(querry);
-           while(rs.next()){
-               model.addRow(new Object[]{
-               rs.getString("id"),
-               rs.getString("name"),
-               rs.getString("gender"),
-               rs.getString("email"),
-               rs.getString("contract"),
-               rs.getString("address"),
-               rs.getString("division"),
-               rs.getString("country"),
-               rs.getString("unique_registration_id"),
-               rs.getString("imageName")
-               });
-           }
+            ResultSet rs = st.executeQuery(querry);
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getString("id"),
+                    rs.getString("name"),
+                    rs.getString("gender"),
+                    rs.getString("email"),
+                    rs.getString("contract"),
+                    rs.getString("address"),
+                    rs.getString("division"),
+                    rs.getString("country"),
+                    rs.getString("unique_registration_id"),
+                    rs.getString("imageName")
+                });
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, ex);
+        }
+    }
+
+    private void deleteFile(String filePath) {
+        File filetodelete = new File(filePath);
+        if (filetodelete.exists()) {
+            if (filetodelete.delete()) {
+                System.out.println("File deleted successfully");
+            } else {
+                System.out.println("Failed to delete the file");
+            }
+        } else {
+            System.out.println("this file doesn't exits");
         }
     }
 
