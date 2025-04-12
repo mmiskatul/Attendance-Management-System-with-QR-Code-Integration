@@ -1,8 +1,11 @@
+
 package foms;
 
 import com.google.gson.Gson;
 import dao.ConnectionProvider;
 import java.awt.Color;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import javax.swing.BorderFactory;
@@ -11,11 +14,14 @@ import utility.DBUtility;
 import java.sql.*;
 import java.util.*;
 import java.util.Objects;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 import net.glxn.qrgen.core.image.ImageType;
 import net.glxn.qrgen.javase.QRCode;
+
 
 public class GenerateQR extends javax.swing.JFrame {
 
@@ -113,6 +119,11 @@ public class GenerateQR extends javax.swing.JFrame {
 
         btnsaveqrat.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         btnsaveqrat.setText("Save QR at");
+        btnsaveqrat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnsaveqratActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -251,41 +262,66 @@ public class GenerateQR extends javax.swing.JFrame {
 
 
     }//GEN-LAST:event_usertableMouseClicked
+    private void btnsaveqratActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnsaveqratActionPerformed
+        JFileChooser filechooser = new JFileChooser();
+        try {
+            if (out == null) {
+                JOptionPane.showMessageDialog(this, "NO QR Generated");
+                return;
+            }
+            filechooser.setDialogTitle("Save QR Code at");
+            filechooser.setSelectedFile(new File(email + ".png"));
+            int userSelection = filechooser.showSaveDialog(this);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = filechooser.getSelectedFile();
+                try {
+                    java.nio.file.Files.write(fileToSave.toPath(), out.toByteArray());
+                    JOptionPane.showMessageDialog(this, "Save QR Code Successfully");
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Error saving QR Code ","Error",JOptionPane.ERROR_MESSAGE);
+                    
+                }
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Something went wrong!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    
+    }//GEN-LAST:event_btnsaveqratActionPerformed
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+    /* Set the Nimbus look and feel */
+    //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+    /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
+     */
+    try {
+        for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            if ("Nimbus".equals(info.getName())) {
+                javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                break;
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(GenerateQR.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(GenerateQR.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(GenerateQR.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(GenerateQR.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new GenerateQR().setVisible(true);
-            }
-        });
+    } catch (ClassNotFoundException ex) {
+        java.util.logging.Logger.getLogger(GenerateQR.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+    } catch (InstantiationException ex) {
+        java.util.logging.Logger.getLogger(GenerateQR.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+    } catch (IllegalAccessException ex) {
+        java.util.logging.Logger.getLogger(GenerateQR.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+    } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        java.util.logging.Logger.getLogger(GenerateQR.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
     }
+    //</editor-fold>
+
+    /* Create and display the form */
+    java.awt.EventQueue.invokeLater(new Runnable() {
+        public void run() {
+            new GenerateQR().setVisible(true);
+        }
+    });
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExit;
