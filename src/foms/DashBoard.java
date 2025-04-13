@@ -181,7 +181,7 @@ public class DashBoard extends javax.swing.JFrame {
     }//GEN-LAST:event_btngenerateqrActionPerformed
 
     private void btnviewqrsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnviewqrsActionPerformed
-        // TODO add your handling code here:
+        DBUtility.openForm(ViewQR.class.getSimpleName(),new ViewQR());
     }//GEN-LAST:event_btnviewqrsActionPerformed
 
     private void btnmarkattendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnmarkattendanceActionPerformed
