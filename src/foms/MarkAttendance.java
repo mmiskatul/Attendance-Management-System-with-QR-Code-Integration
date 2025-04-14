@@ -1,4 +1,3 @@
-
 package foms;
 
 import com.github.sarxos.webcam.Webcam;
@@ -12,8 +11,21 @@ import java.sql.*;
 import dao.ConnectionProvider;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.HeadlessException;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -23,7 +35,13 @@ import javax.swing.BorderFactory;
 import javax.swing.Timer;
 import utility.DBUtility;
 import java.util.*;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
 
 public class MarkAttendance extends javax.swing.JFrame implements Runnable, ThreadFactory {
 
@@ -31,6 +49,7 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
     private Webcam webcam = null;
     private ExecutorService executor = Executors.newSingleThreadExecutor(this);
     private volatile boolean running = true;
+    JLabel lblCheckInCheckOut = new JLabel();
 
     public MarkAttendance() {
         initComponents();
@@ -83,16 +102,7 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Mark Attandence");
 
-        javax.swing.GroupLayout webcamviewLayout = new javax.swing.GroupLayout(webcamview);
-        webcamview.setLayout(webcamviewLayout);
-        webcamviewLayout.setHorizontalGroup(
-            webcamviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 495, Short.MAX_VALUE)
-        );
-        webcamviewLayout.setVerticalGroup(
-            webcamviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 386, Short.MAX_VALUE)
-        );
+        webcamview.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblimage.setText("jLabel2");
 
@@ -122,7 +132,7 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
                 .addGap(33, 33, 33)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(83, 83, 83)
+                        .addGap(86, 86, 86)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(lbltime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -133,7 +143,7 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
                                 .addComponent(jLabel4)
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(84, 84, 84)
+                        .addGap(81, 81, 81)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblname, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblimage, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -178,6 +188,11 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
+        running =false;
+        stopWebcam();
+        if(executor!=null && !executor.isShutdown()){
+            executor.shutdown();
+        }
         this.dispose();
     }//GEN-LAST:event_btnExitActionPerformed
 
@@ -278,7 +293,7 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
         return t;
     }
 
-    private void stopWebcame() {
+    private void stopWebcam() {
         if (webcam != null && webcam.isOpen()) {
             webcam.close();
         }
@@ -306,8 +321,9 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
         }
 
     }
+    private BufferedImage imagee = null;
 
-    private void CircularImageFrame(String finalpath) {
+    private void CircularImageFrame(String imagepath) {
         try {
             Connection con = ConnectionProvider.getcon();
             Statement st = con.createStatement();
@@ -316,12 +332,168 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
                 showPopUpForCertainDuration("User is not registrated or Deleted", "Invalid Qr", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            imagee = null;
+            File imageFile = new File(imagepath);
+            if (imageFile.exists()) {
+                try {
+                    imagee = ImageIO.read(new File(imagepath));
+                    imagee = createCircularImage(imagee);
+                    ImageIcon icon = new ImageIcon(imagee);
+                    lblimage.setIcon(icon);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                BufferedImage imagees = new BufferedImage(300, 300, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = imagees.createGraphics();
+                g2d.setColor(Color.BLACK);
+                g2d.fillOval(25, 25, 250, 250);
+                g2d.setFont(new Font("Serif", Font.BOLD, 250));
+                g2d.setColor(Color.WHITE);
+                g2d.drawString(String.valueOf(resultMap.get("name").charAt(0)).toUpperCase(), 75, 225);
+                g2d.dispose();
+
+                ImageIcon newImageIcon = new ImageIcon(imagees);
+                lblimage.setIcon(newImageIcon);
+                this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                this.pack();
+                this.setLocationRelativeTo(null);
+                this.setVisible(true);
+
+            }
+            lblimage.setHorizontalAlignment(JLabel.CENTER);
+            lblname.setText(resultMap.get("name"));
+            if (!checkInCheckOut()) {
+                return;
+            }
+
         } catch (Exception ex) {
 
         }
     }
 
-    private void showPopUpForCertainDuration(String user_is_not_registrated_or_Deleted, String invalid_Qr, int ERROR_MESSAGE) {
+    private void showPopUpForCertainDuration(String popUpMassage, String popUpHeader, Integer iconId) throws HeadlessException, SQLException, Exception {
+        final JOptionPane optionpane = new JOptionPane(popUpMassage, iconId);
+        final JDialog dialog = optionpane.createDialog(popUpHeader);
+        Timer timer = new Timer(5000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dialog.dispose();
+                clearUserdetails();
+            }
+
+        });
+        timer.setRepeats(false);
+        timer.start();
+        dialog.setVisible(true);
+        lblCheckInCheckOut.setText("");
+        lblCheckInCheckOut.setBackground(null);
+        lblCheckInCheckOut.setForeground(null);
+        lblCheckInCheckOut.setOpaque(false);
+        lblname.setText("");
+        lblimage.setIcon(null);
+
+    }
+
+    private void clearUserdetails() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    private BufferedImage createCircularImage(BufferedImage image) {
+        int diametter = 250;
+        BufferedImage resizedImage = new BufferedImage(diametter, diametter, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImage.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(image, 0, 0, diametter, diametter, null);
+        g2.dispose();
+        BufferedImage circularImage =new BufferedImage(diametter,diametter,BufferedImage.TYPE_INT_ARGB);
+        g2=circularImage.createGraphics();
+        Ellipse2D.Double circle=new Ellipse2D.Double(0,0,diametter,diametter);
+        g2.setClip(circle);
+        g2.drawImage(resizedImage, 0,0,null);
+        return circularImage;
+    }
+
+    private boolean checkInCheckOut() throws HeadlessException, SQLException, Exception {
+        String popUpHeader = null;
+        String popUpMassage = null;
+        Color color = null;
+        Connection con = ConnectionProvider.getcon();
+        Statement st = con.createStatement();
+        LocalDate currentdate = LocalDate.now();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        ResultSet rs = st.executeQuery("SELECT * FROM  userattendance WHERE date ='" + currentdate.format(dateFormatter) + "' user_id =" + Integer.valueOf(resultMap.get("id")) + ";");
+        Connection connection = ConnectionProvider.getcon();
+        if (rs.next()) {
+            String checkOutDateTime = rs.getString(4);
+            if (checkOutDateTime != null) {
+                popUpMassage = "Already CheckOut For the Day";
+                popUpHeader = "Invalid CheckOut";
+                showPopUpForCertainDuration(popUpMassage, popUpHeader, JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            String checkInDateTime = rs.getString(3);
+            LocalDateTime checkInLocalDateTime = LocalDateTime.parse(checkInDateTime, dateTimeFormatter);
+            Duration duration = Duration.between(checkInLocalDateTime, currentDateTime);
+            Long hours = duration.toHours();
+            Long minutes = duration.minusHours(hours).toMinutes();
+            long seconds = duration.minusHours(hours).minusMinutes(minutes).toSeconds();
+
+            if (!(hours > 0 || (hours == 0) && minutes >= 5)) {
+                long remainingMinutes = 4 - minutes;
+                long remainingseconds = 60 - seconds;
+                popUpMassage = String.format("Your Work Duration is less than 5 minutes \nYou can check out after %d minutes %d second", remainingMinutes, remainingseconds);
+                popUpHeader = "Duration Warning ";
+                showPopUpForCertainDuration(popUpMassage, popUpHeader, JOptionPane.WARNING_MESSAGE);
+                return false;
+
+            }
+            String updateQuerry = "update userattendance set checkOut=?,workDuration=?,WHERE date=? and user_id=?";
+            PreparedStatement ps = connection.prepareStatement(updateQuerry);
+            ps.setString(1, currentDateTime.format(dateFormatter));
+            ps.setString(2, "" + hours + " Hours and " + minutes + " minutes");
+            ps.setString(3, currentdate.format(dateFormatter));
+            ps.setString(4, resultMap.get("id"));
+            ps.executeUpdate();
+            popUpHeader = "CheckOut";
+            popUpMassage = "Check Out at " + currentDateTime.format(dateFormatter) + "\nWork duration" + hours + "Hours and" + minutes + "Minutes";
+            color = Color.RED;
+
+        } else {
+//            CheckIn
+            String insertQuery = "INSERT INTO userattendance (user_id,date,checkIn,checkOut) VALUES (?,?,?)";
+            PreparedStatement ps = connection.prepareStatement(insertQuery);
+            ps.setString(1, resultMap.get("id"));
+            ps.setString(2, currentdate.format(dateFormatter));
+            ps.setString(3, currentDateTime.format(dateTimeFormatter));
+            ps.executeUpdate();
+            popUpHeader = "CheckIn";
+            popUpMassage = "Check In at" + currentDateTime.format(dateTimeFormatter);
+            color = Color.GREEN;
+
+        }
+        JLabel lblCheckInCheckOut = new JLabel("Check-In / Check-Out");
+        lblCheckInCheckOut.setHorizontalAlignment(JLabel.CENTER);
+        lblCheckInCheckOut.setText(popUpHeader);
+        lblCheckInCheckOut.setForeground(color);
+        lblCheckInCheckOut.setBackground(Color.DARK_GRAY);
+        lblCheckInCheckOut.setOpaque(true);
+        showPopUpForCertainDuration(popUpMassage, popUpHeader, JOptionPane.INFORMATION_MESSAGE);
+        return true;
+
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        if (imagee != null) {
+            g.drawImage(imagee, 0, 0, null);
+
+        }
 
     }
 }
