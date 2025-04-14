@@ -185,7 +185,7 @@ public class DashBoard extends javax.swing.JFrame {
     }//GEN-LAST:event_btnviewqrsActionPerformed
 
     private void btnmarkattendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnmarkattendanceActionPerformed
-        // TODO add your handling code here:
+       DBUtility.openForm(Markattendance.class.getSimpleName(),new MarkAttendance());
     }//GEN-LAST:event_btnmarkattendanceActionPerformed
 
     private void btndeleteuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btndeleteuserActionPerformed
@@ -246,4 +246,10 @@ public class DashBoard extends javax.swing.JFrame {
     private javax.swing.JButton btnviewqrs;
     private javax.swing.JButton btnviewuser;
     // End of variables declaration//GEN-END:variables
+
+    private static class Markattendance {
+
+        public Markattendance() {
+        }
+    }
 }
