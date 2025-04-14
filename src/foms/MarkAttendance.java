@@ -1,4 +1,3 @@
-
 package foms;
 
 import com.github.sarxos.webcam.Webcam;
@@ -12,8 +11,17 @@ import java.sql.*;
 import dao.ConnectionProvider;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.HeadlessException;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import static java.lang.String.format;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -23,6 +31,10 @@ import javax.swing.BorderFactory;
 import javax.swing.Timer;
 import utility.DBUtility;
 import java.util.*;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 public class MarkAttendance extends javax.swing.JFrame implements Runnable, ThreadFactory {
@@ -306,8 +318,9 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
         }
 
     }
+    private BufferedImage imagee = null;
 
-    private void CircularImageFrame(String finalpath) {
+    private void CircularImageFrame(String imagepath) {
         try {
             Connection con = ConnectionProvider.getcon();
             Statement st = con.createStatement();
@@ -316,12 +329,107 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
                 showPopUpForCertainDuration("User is not registrated or Deleted", "Invalid Qr", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            imagee = null;
+            File imageFile = new File(imagepath);
+            if (imageFile.exists()) {
+                try {
+                    imagee = ImageIO.read(new File(imagepath));
+                    imagee = createCircularImage(imagee);
+                    ImageIcon icon = new ImageIcon(imagee);
+                    lblimage.setIcon(icon);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                BufferedImage imagees = new BufferedImage(300, 300, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = imagees.createGraphics();
+                g2d.setColor(Color.BLACK);
+                g2d.fillOval(25, 25, 250, 250);
+                g2d.setFont(new Font("Serif", Font.BOLD, 250));
+                g2d.setColor(Color.WHITE);
+                g2d.drawString(String.valueOf(resultMap.get("name").charAt(0)).toUpperCase(), 75, 225);
+                g2d.dispose();
+
+                ImageIcon newImageIcon = new ImageIcon(imagees);
+                lblimage.setIcon(newImageIcon);
+                this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                this.pack();
+                this.setLocation(null);
+                this.setVisible(true);
+
+            }
+            lblimage.setHorizontalAlignment(JLabel.CENTER);
+            lblname.setText(resultMap.get("name"));
+            if (!checkInCheckOut()) {
+                return;
+            }
+
         } catch (Exception ex) {
 
         }
     }
 
     private void showPopUpForCertainDuration(String user_is_not_registrated_or_Deleted, String invalid_Qr, int ERROR_MESSAGE) {
+
+    }
+
+    private BufferedImage createCircularImage(BufferedImage imagee) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    private boolean checkInCheckOut() throws HeadlessException, SQLException, Exception {
+        String popUpHeader = null;
+        String popUpMassage = null;
+        Color color = null;
+        Connection con = ConnectionProvider.getcon();
+        Statement st = con.createStatement();
+        LocalDate currentdate = LocalDate.now();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        ResultSet rs = st.executeQuery("SELECT * FROM  userattendance WHERE date ='" + currentdate.format(dateFormatter) + "' user_id =" + Integer.valueOf(resultMap.get("id")) + ";");
+        Connection connection = ConnectionProvider.getcon();
+        if (rs.next()) {
+            String checkOutDateTime = rs.getString(4);
+            if (checkOutDateTime != null) {
+                popUpMassage = "Already CheckOut For the Day";
+                popUpHeader = "Invalid CheckOut";
+                showPopUpForCertainDuration(popUpMassage, popUpHeader, JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            String checkInDateTime = rs.getString(3);
+            LocalDateTime checkInLocalDateTime = LocalDateTime.parse(checkInDateTime, dateTimeFormatter);
+            Duration duration = Duration.between(checkInLocalDateTime, currentDateTime);
+            Long hours = duration.toHours();
+            Long minutes = duration.minusHours(hours).toMinutes();
+            long seconds = duration.minusHours(hours).minusMinutes(minutes).toSeconds();
+
+            if (!(hours >= 0 || (hours == 0) && minutes >= 5)) {
+                long remainingMinutes = 4 - minutes;
+                long remainingseconds = 60 - seconds;
+                popUpMassage = String.format("Your Work Duration is less than 5 minutes \nYou can check out after %d minutes %d second", remainingMinutes, remainingseconds);
+                popUpHeader = "Duration Warning ";
+                showPopUpForCertainDuration(popUpMassage, popUpHeader, JOptionPane.WARNING_MESSAGE);
+                return false;
+
+            }
+            String updateQuerry = "update userattendance set checkOut=?,workDuration=?,WHERE date=? and user_id=?";
+            PreparedStatement ps = connection.prepareStatement(updateQuerry);
+            ps.setString(1, currentDateTime.format(dateFormatter));
+            ps.setString(2, "" + hours + " Hours and " + minutes + " minutes");
+            ps.setString(3, currentdate.format(dateFormatter));
+            ps.setString(4, resultMap.get("id"));
+            ps.executeUpdate();
+            popUpHeader = "CheckOut";
+            popUpMassage = "Check Out at " + currentDateTime.format(dateFormatter) + "\nWork duration" + hours + "Hours and" + minutes + "Minutes";
+            color =Color.RED;
+            
+
+        }else{
+//            CheckIn
+        }
 
     }
 }
