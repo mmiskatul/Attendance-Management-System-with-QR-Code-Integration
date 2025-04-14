@@ -1,20 +1,50 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
+
 package foms;
 
-/**
- *
- * @author user
- */
-public class MarkAttendance extends javax.swing.JFrame {
+import com.github.sarxos.webcam.Webcam;
+import com.github.sarxos.webcam.WebcamPanel;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.zxing.*;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
+import java.sql.*;
+import dao.ConnectionProvider;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import javax.swing.BorderFactory;
+import javax.swing.Timer;
+import utility.DBUtility;
+import java.util.*;
+import javax.swing.JOptionPane;
 
-    /**
-     * Creates new form MarkAttendance
-     */
+public class MarkAttendance extends javax.swing.JFrame implements Runnable, ThreadFactory {
+
+    private WebcamPanel panel = null;
+    private Webcam webcam = null;
+    private ExecutorService executor = Executors.newSingleThreadExecutor(this);
+    private volatile boolean running = true;
+
     public MarkAttendance() {
         initComponents();
+        DBUtility.SetImage(this, "/utility/images/A.jpg", 1024, 600);
+        this.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.YELLOW));
+
+        initWebcam();
+        Timer timer = new Timer(1, e -> updateTime());
+        timer.start();
+    }
+
+    private void updateTime() {
+        SimpleDateFormat simpledatformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        lbltime.setText(simpledatformat.format(new Date()));
     }
 
     /**
@@ -28,6 +58,13 @@ public class MarkAttendance extends javax.swing.JFrame {
 
         btnExit = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        webcamview = new javax.swing.JPanel();
+        lblimage = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        lbltime = new javax.swing.JLabel();
+        lblname = new javax.swing.JLabel();
+        lblchackincheckout = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(1024, 600));
@@ -42,32 +79,98 @@ public class MarkAttendance extends javax.swing.JFrame {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 22)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Mark Attandence");
+
+        javax.swing.GroupLayout webcamviewLayout = new javax.swing.GroupLayout(webcamview);
+        webcamview.setLayout(webcamviewLayout);
+        webcamviewLayout.setHorizontalGroup(
+            webcamviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 495, Short.MAX_VALUE)
+        );
+        webcamviewLayout.setVerticalGroup(
+            webcamviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 386, Short.MAX_VALUE)
+        );
+
+        lblimage.setText("jLabel2");
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel3.setText("Date");
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setText("Time");
+
+        lbltime.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
+        lbltime.setForeground(new java.awt.Color(255, 255, 255));
+        lbltime.setText("Time");
+
+        lblname.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+
+        lblchackincheckout.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(38, 38, 38)
+                .addComponent(webcamview, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(33, 33, 33)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(83, 83, 83)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(lbltime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(161, 161, 161))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addGap(81, 81, 81)
+                                .addComponent(jLabel4)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(84, 84, 84)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblname, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblimage, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblchackincheckout, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap())))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(429, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(397, 397, 397)
+                .addContainerGap(418, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(336, 336, 336)
                 .addComponent(btnExit)
-                .addContainerGap())
+                .addGap(51, 51, 51))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnExit))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel4))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(15, 15, 15)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(28, 28, 28)
+                        .addComponent(lbltime)
+                        .addGap(26, 26, 26)
+                        .addComponent(lblimage, javax.swing.GroupLayout.PREFERRED_SIZE, 269, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblname, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblchackincheckout, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(btnExit)))
-                .addContainerGap(409, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(webcamview, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(72, Short.MAX_VALUE))
         );
 
         pack();
@@ -116,5 +219,109 @@ public class MarkAttendance extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExit;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel lblchackincheckout;
+    private javax.swing.JLabel lblimage;
+    private javax.swing.JLabel lblname;
+    private javax.swing.JLabel lbltime;
+    private javax.swing.JPanel webcamview;
     // End of variables declaration//GEN-END:variables
+
+    Map<String, String> resultMap = new HashMap<String, String>();
+
+    @Override
+    public void run() {
+        do {
+            try {
+                Thread.sleep(1000);
+
+            } catch (InterruptedException ex) {
+
+            }
+            try {
+                Result result = null;
+                BufferedImage image = null;
+                if (webcam.isOpen()) {
+                    if ((image = webcam.getImage()) == null) {
+                        continue;
+                    }
+                }
+                LuminanceSource source = new BufferedImageLuminanceSource(image);
+                BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+                try {
+                    result = new MultiFormatReader().decode(bitmap);
+
+                } catch (NotFoundException ex) {
+
+                }
+                if (result != null) {
+                    String jsonString = result.getText();
+                    Gson gson = new Gson();
+                    java.lang.reflect.Type type = new TypeToken<Map<String, String>>() {
+                    }.getType();
+                    resultMap = gson.fromJson(jsonString, type);
+
+                    String finalpath = DBUtility.getPath("images\\" + resultMap.get("email") + ".jpg");
+                    CircularImageFrame(finalpath);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } while (running);
+    }
+
+    @Override
+    public Thread newThread(Runnable r) {
+        Thread t = new Thread(r, "My Thread");
+        t.setDaemon(true);
+        return t;
+    }
+
+    private void stopWebcame() {
+        if (webcam != null && webcam.isOpen()) {
+            webcam.close();
+        }
+    }
+
+    private void initWebcam() {
+        webcam = Webcam.getDefault();
+        if (webcam != null) {
+            Dimension[] resolution = webcam.getViewSizes();
+            Dimension Maxresolution = resolution[resolution.length - 1];
+
+            if (webcam.open()) {
+                webcam.close();
+            }
+            webcam.setViewSize(Maxresolution);
+            webcam.open();
+            panel = new WebcamPanel(webcam);
+            panel.setPreferredSize(Maxresolution);
+            panel.setFPSDisplayed(true);
+            webcamview.add(panel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 495, 386));
+            executor.execute(this);
+            executor.shutdown();
+        } else {
+            System.out.println("Issue with Webcam!");
+        }
+
+    }
+
+    private void CircularImageFrame(String finalpath) {
+        try {
+            Connection con = ConnectionProvider.getcon();
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM userdetails WHERE email='" + resultMap.get("email") + "';");
+            if (!rs.next()) {
+                showPopUpForCertainDuration("User is not registrated or Deleted", "Invalid Qr", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } catch (Exception ex) {
+
+        }
+    }
+
+    private void showPopUpForCertainDuration(String user_is_not_registrated_or_Deleted, String invalid_Qr, int ERROR_MESSAGE) {
+
+    }
 }
