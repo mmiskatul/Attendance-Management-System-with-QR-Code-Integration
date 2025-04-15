@@ -193,7 +193,7 @@ public class DashBoard extends javax.swing.JFrame {
     }//GEN-LAST:event_btndeleteuserActionPerformed
 
     private void btnviewattendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnviewattendanceActionPerformed
-        // TODO add your handling code here:
+       DBUtility.openForm(ViewAttandance.class.getSimpleName(),new  ViewAttandance());
     }//GEN-LAST:event_btnviewattendanceActionPerformed
 
     private void btnExit1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExit1ActionPerformed
