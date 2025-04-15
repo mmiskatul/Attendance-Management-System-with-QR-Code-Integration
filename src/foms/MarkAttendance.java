@@ -42,14 +42,17 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
+import org.apache.log4j.Logger;
 
 public class MarkAttendance extends javax.swing.JFrame implements Runnable, ThreadFactory {
 
+    private static final Logger logger = Logger.getLogger(MarkAttendance.class);
     private WebcamPanel panel = null;
     private Webcam webcam = null;
-    private ExecutorService executor = Executors.newSingleThreadExecutor(this);
+    private ExecutorService executor = null;
     private volatile boolean running = true;
-    JLabel lblCheckInCheckOut = new JLabel();
+    private BufferedImage imagee = null;
+    Map<String, String> resultMap = new HashMap<String, String>();
 
     public MarkAttendance() {
         initComponents();
@@ -188,9 +191,9 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
-        running =false;
+        running = false;
         stopWebcam();
-        if(executor!=null && !executor.isShutdown()){
+        if (executor != null && !executor.isShutdown()) {
             executor.shutdown();
         }
         this.dispose();
@@ -243,47 +246,50 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
     private javax.swing.JPanel webcamview;
     // End of variables declaration//GEN-END:variables
 
-    Map<String, String> resultMap = new HashMap<String, String>();
-
     @Override
     public void run() {
-        do {
+        while (running) {
             try {
                 Thread.sleep(1000);
 
-            } catch (InterruptedException ex) {
-
-            }
-            try {
-                Result result = null;
-                BufferedImage image = null;
-                if (webcam.isOpen()) {
-                    if ((image = webcam.getImage()) == null) {
-                        continue;
-                    }
+                if (webcam == null || !webcam.isOpen()) {
+                    continue;
                 }
+
+                BufferedImage image = webcam.getImage();
+                if (image == null) {
+                    continue;
+                }
+
                 LuminanceSource source = new BufferedImageLuminanceSource(image);
                 BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+
                 try {
-                    result = new MultiFormatReader().decode(bitmap);
-
+                    Result result = new MultiFormatReader().decode(bitmap);
+                    if (result != null) {
+                        processQRResult(result);
+                    }
                 } catch (NotFoundException ex) {
-
+                    // Expected exception when no QR code is found
+                } catch (Exception ex) {
+                    logger.error("Error processing QR code", ex);
                 }
-                if (result != null) {
-                    String jsonString = result.getText();
-                    Gson gson = new Gson();
-                    java.lang.reflect.Type type = new TypeToken<Map<String, String>>() {
-                    }.getType();
-                    resultMap = gson.fromJson(jsonString, type);
-
-                    String finalpath = DBUtility.getPath("images\\" + resultMap.get("email") + ".jpg");
-                    CircularImageFrame(finalpath);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                break;
             }
-        } while (running);
+        }
+    }
+
+    private void processQRResult(Result result) {
+        String jsonString = result.getText();
+        Gson gson = new Gson();
+        java.lang.reflect.Type type = new TypeToken<Map<String, String>>() {
+        }.getType();
+        resultMap = gson.fromJson(jsonString, type);
+
+        String finalpath = DBUtility.getPath("images\\" + resultMap.get("email") + ".jpg");
+        CircularImageFrame(finalpath);
     }
 
     @Override
@@ -294,206 +300,220 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
     }
 
     private void stopWebcam() {
-        if (webcam != null && webcam.isOpen()) {
+        if (webcam != null) {
             webcam.close();
+        }
+        if (panel != null) {
+            panel.stop();
         }
     }
 
     private void initWebcam() {
-        webcam = Webcam.getDefault();
-        if (webcam != null) {
-            Dimension[] resolution = webcam.getViewSizes();
-            Dimension Maxresolution = resolution[resolution.length - 1];
+        try {
+            webcam = Webcam.getDefault();
+            if (webcam != null) {
+                Dimension[] resolutions = webcam.getViewSizes();
+                Dimension maxResolution = resolutions[resolutions.length - 1];
+                webcam.setViewSize(maxResolution);
 
-            if (webcam.open()) {
-                webcam.close();
+                // Add delay for webcam initialization
+                webcam.open(true); 
+
+                panel = new WebcamPanel(webcam);
+                panel.setPreferredSize(maxResolution);
+                panel.setFPSDisplayed(true);
+                webcamview.add(panel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 495, 386));
+
+                executor = Executors.newSingleThreadExecutor(this);
+                executor.execute(this);
+            } else {
+                JOptionPane.showMessageDialog(this, "No webcam detected!", "Error", JOptionPane.ERROR_MESSAGE);
             }
-            webcam.setViewSize(Maxresolution);
-            webcam.open();
-            panel = new WebcamPanel(webcam);
-            panel.setPreferredSize(Maxresolution);
-            panel.setFPSDisplayed(true);
-            webcamview.add(panel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 495, 386));
-            executor.execute(this);
-            executor.shutdown();
-        } else {
-            System.out.println("Issue with Webcam!");
+        } catch (Exception e) {
+            logger.error("Webcam initialization error", e);
+            JOptionPane.showMessageDialog(this, "Webcam initialization failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
     }
-    private BufferedImage imagee = null;
 
     private void CircularImageFrame(String imagepath) {
         try {
             Connection con = ConnectionProvider.getcon();
-            Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM userdetails WHERE email='" + resultMap.get("email") + "';");
+            PreparedStatement st = con.prepareStatement("SELECT * FROM userdetails WHERE email=?");
+            st.setString(1, resultMap.get("email"));
+            ResultSet rs = st.executeQuery();
+
             if (!rs.next()) {
-                showPopUpForCertainDuration("User is not registrated or Deleted", "Invalid Qr", JOptionPane.ERROR_MESSAGE);
+                showPopUpForCertainDuration("User is not registered or Deleted", "Invalid QR", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+
             imagee = null;
             File imageFile = new File(imagepath);
             if (imageFile.exists()) {
                 try {
-                    imagee = ImageIO.read(new File(imagepath));
+                    imagee = ImageIO.read(imageFile);
                     imagee = createCircularImage(imagee);
-                    ImageIcon icon = new ImageIcon(imagee);
-                    lblimage.setIcon(icon);
-
+                    lblimage.setIcon(new ImageIcon(imagee));
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    logger.error("Error loading image", ex);
+                    createDefaultImage();
                 }
             } else {
-                BufferedImage imagees = new BufferedImage(300, 300, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2d = imagees.createGraphics();
-                g2d.setColor(Color.BLACK);
-                g2d.fillOval(25, 25, 250, 250);
-                g2d.setFont(new Font("Serif", Font.BOLD, 250));
-                g2d.setColor(Color.WHITE);
-                g2d.drawString(String.valueOf(resultMap.get("name").charAt(0)).toUpperCase(), 75, 225);
-                g2d.dispose();
-
-                ImageIcon newImageIcon = new ImageIcon(imagees);
-                lblimage.setIcon(newImageIcon);
-                this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                this.pack();
-                this.setLocationRelativeTo(null);
-                this.setVisible(true);
-
+                createDefaultImage();
             }
+
             lblimage.setHorizontalAlignment(JLabel.CENTER);
             lblname.setText(resultMap.get("name"));
-            if (!checkInCheckOut()) {
-                return;
-            }
+            checkInCheckOut();
 
         } catch (Exception ex) {
-
+            logger.error("Error in CircularImageFrame", ex);
         }
     }
 
-    private void showPopUpForCertainDuration(String popUpMassage, String popUpHeader, Integer iconId) throws HeadlessException, SQLException, Exception {
-        final JOptionPane optionpane = new JOptionPane(popUpMassage, iconId);
-        final JDialog dialog = optionpane.createDialog(popUpHeader);
-        Timer timer = new Timer(5000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-                clearUserdetails();
-            }
+    private void createDefaultImage() {
+        BufferedImage imagees = new BufferedImage(300, 300, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = imagees.createGraphics();
+        g2d.setColor(Color.BLACK);
+        g2d.fillOval(25, 25, 250, 250);
+        g2d.setFont(new Font("Serif", Font.BOLD, 250));
+        g2d.setColor(Color.WHITE);
+        g2d.drawString(String.valueOf(resultMap.get("name").charAt(0)).toUpperCase(), 75, 225);
+        g2d.dispose();
+        lblimage.setIcon(new ImageIcon(imagees));
+    }
 
+     private void showPopUpForCertainDuration(String popUpMessage, String popUpHeader, Integer iconId) {
+        final JOptionPane optionPane = new JOptionPane(popUpMessage, iconId);
+        final JDialog dialog = optionPane.createDialog(popUpHeader);
+        
+        Timer timer = new Timer(5000, e -> {
+            dialog.dispose();
+            clearUserDetails();
         });
         timer.setRepeats(false);
         timer.start();
+        
         dialog.setVisible(true);
-        lblCheckInCheckOut.setText("");
-        lblCheckInCheckOut.setBackground(null);
-        lblCheckInCheckOut.setForeground(null);
-        lblCheckInCheckOut.setOpaque(false);
-        lblname.setText("");
-        lblimage.setIcon(null);
-
     }
 
-    private void clearUserdetails() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+   private void clearUserDetails() {
+        lblchackincheckout.setText("");
+        lblchackincheckout.setBackground(null);
+        lblchackincheckout.setForeground(null);
+        lblchackincheckout.setOpaque(false);
+        lblname.setText("");
+        lblimage.setIcon(null);
     }
 
     private BufferedImage createCircularImage(BufferedImage image) {
-        int diametter = 250;
-        BufferedImage resizedImage = new BufferedImage(diametter, diametter, BufferedImage.TYPE_INT_ARGB);
+        int diameter = 250;
+        BufferedImage resizedImage = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = resizedImage.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.drawImage(image, 0, 0, diametter, diametter, null);
+        g2.drawImage(image, 0, 0, diameter, diameter, null);
         g2.dispose();
-        BufferedImage circularImage =new BufferedImage(diametter,diametter,BufferedImage.TYPE_INT_ARGB);
-        g2=circularImage.createGraphics();
-        Ellipse2D.Double circle=new Ellipse2D.Double(0,0,diametter,diametter);
+        
+        BufferedImage circularImage = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+        g2 = circularImage.createGraphics();
+        Ellipse2D.Double circle = new Ellipse2D.Double(0, 0, diameter, diameter);
         g2.setClip(circle);
-        g2.drawImage(resizedImage, 0,0,null);
+        g2.drawImage(resizedImage, 0, 0, null);
+        g2.dispose();
+        
         return circularImage;
     }
 
-    private boolean checkInCheckOut() throws HeadlessException, SQLException, Exception {
-        String popUpHeader = null;
-        String popUpMassage = null;
-        Color color = null;
-        Connection con = ConnectionProvider.getcon();
-        Statement st = con.createStatement();
-        LocalDate currentdate = LocalDate.now();
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+   private boolean checkInCheckOut() {
+        try {
+            Connection con = ConnectionProvider.getcon();
+            LocalDate currentDate = LocalDate.now();
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        ResultSet rs = st.executeQuery("SELECT * FROM  userattendance WHERE date ='" + currentdate.format(dateFormatter) + "' user_id =" + Integer.valueOf(resultMap.get("id")) + ";");
-        Connection connection = ConnectionProvider.getcon();
-        if (rs.next()) {
-            String checkOutDateTime = rs.getString(4);
-            if (checkOutDateTime != null) {
-                popUpMassage = "Already CheckOut For the Day";
-                popUpHeader = "Invalid CheckOut";
-                showPopUpForCertainDuration(popUpMassage, popUpHeader, JOptionPane.ERROR_MESSAGE);
-                return false;
+            // Fixed SQL query syntax
+            PreparedStatement st = con.prepareStatement(
+                "SELECT * FROM userattendance WHERE date=? AND user_id=?");
+            st.setString(1, currentDate.format(dateFormatter));
+            st.setInt(2, Integer.parseInt(resultMap.get("id")));
+            ResultSet rs = st.executeQuery();
+
+            String popUpHeader;
+            String popUpMessage;
+            Color color;
+
+            if (rs.next()) {
+                // Check-out logic
+                String checkOutDateTime = rs.getString("checkOut");
+                if (checkOutDateTime != null) {
+                    showPopUpForCertainDuration("Already Checked Out For the Day", "Invalid CheckOut", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+
+                String checkInDateTime = rs.getString("checkIn");
+                LocalDateTime checkInLocalDateTime = LocalDateTime.parse(checkInDateTime, dateTimeFormatter);
+                Duration duration = Duration.between(checkInLocalDateTime, currentDateTime);
+                long hours = duration.toHours();
+                long minutes = duration.minusHours(hours).toMinutes();
+                long seconds = duration.minusHours(hours).minusMinutes(minutes).toSeconds();
+
+                if (hours == 0 && minutes < 5) {
+                    long remainingMinutes = 4 - minutes;
+                    long remainingSeconds = 60 - seconds;
+                    popUpMessage = String.format(
+                        "Your Work Duration is less than 5 minutes\nYou can check out after %d minutes %d seconds", 
+                        remainingMinutes, remainingSeconds);
+                    showPopUpForCertainDuration(popUpMessage, "Duration Warning", JOptionPane.WARNING_MESSAGE);
+                    return false;
+                }
+
+                // Update check-out
+                PreparedStatement ps = con.prepareStatement(
+                    "UPDATE userattendance SET checkOut=?, workDuration=? WHERE date=? AND user_id=?");
+                ps.setString(1, currentDateTime.format(dateTimeFormatter));
+                ps.setString(2, hours + " Hours and " + minutes + " minutes");
+                ps.setString(3, currentDate.format(dateFormatter));
+                ps.setInt(4, Integer.parseInt(resultMap.get("id")));
+                ps.executeUpdate();
+
+                popUpHeader = "CheckOut";
+                popUpMessage = "Checked Out at " + currentDateTime.format(dateTimeFormatter) + 
+                    "\nWork duration: " + hours + " Hours and " + minutes + " Minutes";
+                color = Color.RED;
+            } else {
+                // Check-in logic
+                PreparedStatement ps = con.prepareStatement(
+                    "INSERT INTO userattendance (user_id, date, checkIn) VALUES (?, ?, ?)");
+                ps.setInt(1, Integer.parseInt(resultMap.get("id")));
+                ps.setString(2, currentDate.format(dateFormatter));
+                ps.setString(3, currentDateTime.format(dateTimeFormatter));
+                ps.executeUpdate();
+
+                popUpHeader = "CheckIn";
+                popUpMessage = "Checked In at " + currentDateTime.format(dateTimeFormatter);
+                color = Color.GREEN;
             }
-            String checkInDateTime = rs.getString(3);
-            LocalDateTime checkInLocalDateTime = LocalDateTime.parse(checkInDateTime, dateTimeFormatter);
-            Duration duration = Duration.between(checkInLocalDateTime, currentDateTime);
-            Long hours = duration.toHours();
-            Long minutes = duration.minusHours(hours).toMinutes();
-            long seconds = duration.minusHours(hours).minusMinutes(minutes).toSeconds();
 
-            if (!(hours > 0 || (hours == 0) && minutes >= 5)) {
-                long remainingMinutes = 4 - minutes;
-                long remainingseconds = 60 - seconds;
-                popUpMassage = String.format("Your Work Duration is less than 5 minutes \nYou can check out after %d minutes %d second", remainingMinutes, remainingseconds);
-                popUpHeader = "Duration Warning ";
-                showPopUpForCertainDuration(popUpMassage, popUpHeader, JOptionPane.WARNING_MESSAGE);
-                return false;
+            lblchackincheckout.setHorizontalAlignment(JLabel.CENTER);
+            lblchackincheckout.setText(popUpHeader);
+            lblchackincheckout.setForeground(color);
+            lblchackincheckout.setBackground(Color.DARK_GRAY);
+            lblchackincheckout.setOpaque(true);
+            showPopUpForCertainDuration(popUpMessage, popUpHeader, JOptionPane.INFORMATION_MESSAGE);
+            return true;
 
-            }
-            String updateQuerry = "update userattendance set checkOut=?,workDuration=?,WHERE date=? and user_id=?";
-            PreparedStatement ps = connection.prepareStatement(updateQuerry);
-            ps.setString(1, currentDateTime.format(dateFormatter));
-            ps.setString(2, "" + hours + " Hours and " + minutes + " minutes");
-            ps.setString(3, currentdate.format(dateFormatter));
-            ps.setString(4, resultMap.get("id"));
-            ps.executeUpdate();
-            popUpHeader = "CheckOut";
-            popUpMassage = "Check Out at " + currentDateTime.format(dateFormatter) + "\nWork duration" + hours + "Hours and" + minutes + "Minutes";
-            color = Color.RED;
-
-        } else {
-//            CheckIn
-            String insertQuery = "INSERT INTO userattendance (user_id,date,checkIn,checkOut) VALUES (?,?,?)";
-            PreparedStatement ps = connection.prepareStatement(insertQuery);
-            ps.setString(1, resultMap.get("id"));
-            ps.setString(2, currentdate.format(dateFormatter));
-            ps.setString(3, currentDateTime.format(dateTimeFormatter));
-            ps.executeUpdate();
-            popUpHeader = "CheckIn";
-            popUpMassage = "Check In at" + currentDateTime.format(dateTimeFormatter);
-            color = Color.GREEN;
-
+        } catch (Exception ex) {
+            logger.error("Error in checkInCheckOut", ex);
+            return false;
         }
-        JLabel lblCheckInCheckOut = new JLabel("Check-In / Check-Out");
-        lblCheckInCheckOut.setHorizontalAlignment(JLabel.CENTER);
-        lblCheckInCheckOut.setText(popUpHeader);
-        lblCheckInCheckOut.setForeground(color);
-        lblCheckInCheckOut.setBackground(Color.DARK_GRAY);
-        lblCheckInCheckOut.setOpaque(true);
-        showPopUpForCertainDuration(popUpMassage, popUpHeader, JOptionPane.INFORMATION_MESSAGE);
-        return true;
-
     }
 
-    @Override
+     @Override
     public void paint(Graphics g) {
         super.paint(g);
         if (imagee != null) {
             g.drawImage(imagee, 0, 0, null);
-
         }
-
     }
 }
