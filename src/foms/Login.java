@@ -10,7 +10,7 @@ public class Login extends javax.swing.JFrame {
     public Login() {
         initComponents();
         
-        DBUtility.SetImage(this, "images/login-background.jpg", 635, 506);
+        DBUtility.SetImage(this, "/images/login-background.jpg", 635, 506);
         this.getRootPane().setBorder(BorderFactory.createMatteBorder(6, 6, 6, 6, Color.ORANGE));
         textEmail.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.yellow));
         textPassword.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.yellow));
