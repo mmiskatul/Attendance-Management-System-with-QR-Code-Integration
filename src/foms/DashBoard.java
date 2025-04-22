@@ -185,7 +185,7 @@ public class DashBoard extends javax.swing.JFrame {
     }//GEN-LAST:event_btnviewqrsActionPerformed
 
     private void btnmarkattendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnmarkattendanceActionPerformed
-//       DBUtility.openForm(Markattendance.class.getSimpleName(),new MarkAttendance());
+       DBUtility.openForm(Markattendance.class.getSimpleName(),new MarkAttendance());
     }//GEN-LAST:event_btnmarkattendanceActionPerformed
 
     private void btndeleteuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btndeleteuserActionPerformed
@@ -193,7 +193,7 @@ public class DashBoard extends javax.swing.JFrame {
     }//GEN-LAST:event_btndeleteuserActionPerformed
 
     private void btnviewattendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnviewattendanceActionPerformed
-       DBUtility.openForm(ViewAttandance.class.getSimpleName(),new  ViewAttandance());
+       
     }//GEN-LAST:event_btnviewattendanceActionPerformed
 
     private void btnExit1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExit1ActionPerformed
