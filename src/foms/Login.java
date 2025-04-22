@@ -1,9 +1,13 @@
 package foms;
 
+import dao.ConnectionProvider;
 import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import utility.DBUtility;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Login extends javax.swing.JFrame {
 
@@ -15,6 +19,7 @@ public class Login extends javax.swing.JFrame {
         textEmail.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.yellow));
         textPassword.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.yellow));
     }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -28,6 +33,7 @@ public class Login extends javax.swing.JFrame {
         textEmail = new javax.swing.JTextField();
         textPassword = new javax.swing.JPasswordField();
         btnlogin = new javax.swing.JButton();
+        btnSignup = new javax.swing.JButton();
 
         jButton1.setText("jButton1");
 
@@ -76,6 +82,14 @@ public class Login extends javax.swing.JFrame {
             }
         });
 
+        btnSignup.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btnSignup.setText("Sign Up");
+        btnSignup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSignupActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -104,6 +118,8 @@ public class Login extends javax.swing.JFrame {
                                     .addComponent(textEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(btnlogin, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnSignup, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(66, 66, 66)))))
                 .addContainerGap(44, Short.MAX_VALUE))
         );
@@ -128,7 +144,9 @@ public class Login extends javax.swing.JFrame {
                             .addComponent(jLabel5)
                             .addComponent(textPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(26, 26, 26)
-                        .addComponent(btnlogin)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnlogin)
+                            .addComponent(btnSignup))
                         .addGap(30, 30, 30))))
         );
 
@@ -143,17 +161,86 @@ public class Login extends javax.swing.JFrame {
     private void btnloginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnloginActionPerformed
         String email = textEmail.getText();
         String password = new String(textPassword.getPassword());
-        if ("Miskatul".equalsIgnoreCase(email) && "Miskatul".equalsIgnoreCase(password)) {
-            this.dispose();
-            DBUtility.openForm(DashBoard.class.getSimpleName(), new DashBoard());
-        } else {
-            JOptionPane.showMessageDialog(null, "Invalid Credentials!", "Invalid", JOptionPane.ERROR_MESSAGE);
+        
+        try {
+            if (validateLogin(email, password)) {
+                this.dispose();
+                DBUtility.openForm(DashBoard.class.getSimpleName(), new DashBoard());
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid Credentials!", "Invalid", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnloginActionPerformed
 
+    private void btnSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignupActionPerformed
+        String email = textEmail.getText();
+        String password = new String(textPassword.getPassword());
+        
+        if (email.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Email and password cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        try {
+            if (registerUser(email, password)) {
+                JOptionPane.showMessageDialog(null, "Registration successful! You can now login.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Registration failed. User may already exist.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_btnSignupActionPerformed
+
     private void textEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textEmailActionPerformed
-    
+        // TODO add your handling code here:
     }//GEN-LAST:event_textEmailActionPerformed
+
+    // Database methods
+    private boolean validateLogin(String email, String password) throws Exception {
+        // For now, keeping the hardcoded admin login
+        if ("admin".equalsIgnoreCase(email) && "admin".equalsIgnoreCase(password)) {
+            return true;
+        }
+        
+        try {
+            Connection con = ConnectionProvider.getcon();
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM users WHERE email=? AND password=?");
+            ps.setString(1, email);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    private boolean registerUser(String email, String password) throws Exception {
+        try {
+            // First check if user already exists
+            Connection con = ConnectionProvider.getcon();
+            PreparedStatement check = con.prepareStatement("SELECT * FROM users WHERE email=?");
+            check.setString(1, email);
+            ResultSet rs = check.executeQuery();
+            
+            if (rs.next()) {
+                return false; // User already exists
+            }
+            
+            // Insert new user
+            PreparedStatement ps = con.prepareStatement("INSERT INTO users (email, password) VALUES (?, ?)");
+            ps.setString(1, email);
+            ps.setString(2, password);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -192,6 +279,7 @@ public class Login extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExit;
+    private javax.swing.JButton btnSignup;
     private javax.swing.JButton btnlogin;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;

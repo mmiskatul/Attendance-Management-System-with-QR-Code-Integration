@@ -89,7 +89,6 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
         lblchackincheckout = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMaximumSize(new java.awt.Dimension(1024, 600));
         setMinimumSize(new java.awt.Dimension(1024, 600));
         setUndecorated(true);
 
@@ -106,8 +105,6 @@ public class MarkAttendance extends javax.swing.JFrame implements Runnable, Thre
         jLabel1.setText("Mark Attandence");
 
         webcamview.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        lblimage.setText("jLabel2");
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
